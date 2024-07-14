@@ -4,6 +4,7 @@ import { RequestContext } from '@medibloc/nestjs-request-context';
 export class MyRequestContext extends RequestContext {
   token: string;
   ip: string;
+  roleTag: string;
 }
 
 @Injectable()
@@ -46,5 +47,25 @@ export class RequestContextService {
   get ip() {
     const ctx: MyRequestContext = RequestContext.get();
     return ctx.ip;
+  }
+
+  /**
+   * Sets roleTag in the request context.
+   *
+   * @param {string} roleTag The roleTag to set.
+   */
+  set roleTag(roleTag: string) {
+    const ctx: MyRequestContext = RequestContext.get();
+    ctx.roleTag = roleTag;
+  }
+
+  /**
+   * Retrieves the the roleTag from the request context.
+   *
+   * @returns {string} The roleTag value.
+   */
+  get roleTag() {
+    const ctx: MyRequestContext = RequestContext.get();
+    return ctx.roleTag;
   }
 }

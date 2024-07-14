@@ -1,8 +1,6 @@
 import {
   BadRequestException,
   ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -10,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Activity } from '../activity/entities/activity.entity';
 import { ActivityService } from '../activity/activity.service';
-import { VerifyDto } from './dto/verify.dto';
 import { EmailDto } from './dto/email-verify.dto';
 import { RessetPasswordDto } from './dto/reset-password.dto';
 import { ConfigService } from '@nestjs/config';
@@ -50,25 +47,6 @@ export class AuthService {
     const deviceDetector = new DeviceDetector();
     const device = deviceDetector.parse(userAgent);
 
-    if (!user.verifiedAt) {
-      user = await this.updateVerificationCode(user);
-      await this.notificationGenerator.sendVerificationMail(
-        {
-          userId: user.id,
-          channels: ['email'],
-        },
-        await this.helperService.decrypt(user.code),
-      );
-      throw new HttpException(
-        {
-          status: HttpStatus.EXPECTATION_FAILED,
-          message:
-            'Email not verified, a verification mail has been sent to ' +
-            user.email,
-        },
-        HttpStatus.EXPECTATION_FAILED,
-      );
-    }
     const accessToken = this.getCookieWithJwtAccessToken(user);
     await this.sessionService.save(user.id, accessToken, device);
 
@@ -95,72 +73,6 @@ export class AuthService {
       ...user,
       accessToken,
     };
-  }
-
-  /**
-   * Verifies a user based on the provided verification code and email.
-   *
-   * @param request - The verification request containing email and verification code.
-   * @param userAgent - The user-agent string from the request.
-   * @returns An object containing the user data and an access token after successful verification.
-   * @throws BadRequestException if the provided code is invalid, user not found, or code has expired.
-   */
-  async verifyUser(request: VerifyDto, userAgent: string) {
-    const deviceDetector = new DeviceDetector();
-    const device = deviceDetector.parse(userAgent);
-    const user: User = await this.userRepository.findOne({
-      where: {
-        email: request.email,
-        code: await this.helperService.encrypt(request.code),
-        isDeleted: false,
-      },
-    });
-    if (!user) {
-      throw new BadRequestException('Invalid code, user not found');
-    }
-    const expired = this.helperService.checkExpired(user.tokenExpireAt);
-    if (expired) {
-      throw new BadRequestException('Code has expired');
-    }
-    if (!user.verifiedAt) {
-      await this.userRepository.update(user.id, { verifiedAt: new Date() });
-    }
-    const accessToken = this.getCookieWithJwtAccessToken(user);
-    await this.sessionService.save(user.id, accessToken, device);
-    return {
-      ...user,
-      accessToken,
-    };
-  }
-
-  /**
-   * Sends an email verification mail to the user with the specified email address.
-   *
-   * @param request - The request containing the email address to send the verification mail to.
-   * @throws BadRequestException if no user is found with the provided email address.
-   */
-  async sendEmailVerificationMail(request: EmailDto) {
-    let user: User = await this.userRepository.findOne({
-      where: {
-        email: request.email,
-        isDeleted: false,
-      },
-    });
-    if (!user) {
-      throw new BadRequestException('User with this email not found');
-    }
-
-    //update verification code
-    user = await this.updateVerificationCode(user);
-
-    //Send mail
-    await this.notificationGenerator.sendVerificationMail(
-      {
-        userId: user.id,
-        channels: ['email'],
-      },
-      await this.helperService.decrypt(user.code),
-    );
   }
 
   /**

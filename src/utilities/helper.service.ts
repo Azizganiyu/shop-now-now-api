@@ -272,4 +272,26 @@ export class HelperService {
       secret: twofa.secret,
     });
   }
+
+  /**
+   * Converts a given text to an ID-friendly format.
+   *
+   * - Trims whitespace from the beginning and end.
+   * - Converts the text to lowercase.
+   * - Removes all non-alphanumeric characters except spaces.
+   * - Replaces spaces with hyphens.
+   *
+   * @param {string} text - The input text to be converted.
+   * @returns {string} The converted text in ID-friendly format.
+   */
+  idFromName(text: string): string {
+    if (!text) {
+      return text;
+    }
+    return text
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9 ]/g, '') // Remove all non-alphanumeric characters except spaces
+      .replace(/\s+/g, '-'); // Replace spaces with hyphens
+  }
 }

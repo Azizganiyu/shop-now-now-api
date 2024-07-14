@@ -29,6 +29,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ApiLog } from './modules/activity/entities/api-logs.entity';
 import { validate } from './configs/env.validation';
 import { ormConfig } from 'datasource';
+import { ProductModule } from './modules/product/product.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { ormConfig } from 'datasource';
     SecurityModule,
     UserModule,
     MiscModule,
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [

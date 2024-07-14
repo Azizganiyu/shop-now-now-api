@@ -15,6 +15,7 @@ async function bootstrap() {
           logger.debug('Seeding complete!');
         })
         .catch((error) => {
+          console.log(error);
           logger.error('Seeding failed!', 'error');
           throw error;
         })

@@ -66,6 +66,10 @@ export class JwtTwoFaStrategy extends PassportStrategy(
 
     //validate session
     await this.sessionService.validateSession();
+
+    //set role
+    this.requestContext.roleTag = user.role.tag;
+
     return {
       ...payload,
       ...user,

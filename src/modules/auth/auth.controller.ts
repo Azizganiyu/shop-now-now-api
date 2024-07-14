@@ -100,6 +100,25 @@ export class UserAuthController {
   }
 
   /**
+   * Sends a verification email for user pre-registration.
+   *
+   * @param {EmailDto} request - DTO containing the email address.
+   * @returns {Promise<{ status: boolean, message: string }>} Status and message.
+   */
+  @ApiCreatedResponse({ type: ApiResponseDto })
+  @HttpCode(201)
+  @Post('pre-register')
+  async preRegister(
+    @Body() request: EmailDto,
+  ): Promise<{ status: boolean; message: string }> {
+    await this.userService.createTempUser(request);
+    return {
+      status: true,
+      message: 'Email verification successfully sent to ' + request.email,
+    };
+  }
+
+  /**
    * Handles the user logout process.
    *
    * @param res - The response object used to clear cookies.
@@ -120,40 +139,37 @@ export class UserAuthController {
   }
 
   /**
-   * Handles the user verification process.
+   * Verifies a temporary user.
    *
-   * @param request - The verification request body containing user details.
-   * @param userAgent - The user-agent header from the request.
-   * @returns An object containing the verification status, message, and user data with an access token.
+   * @param {VerifyDto} request - DTO containing verification details.
+   * @returns {Promise<{ status: boolean, message: string }>} Status and message.
    */
+  @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
-  @ApiOkResponse({ type: LoginResponseDto })
   @Post('verify')
   async verify(
     @Body() request: VerifyDto,
-    @Headers('user-agent') userAgent: string,
-  ) {
-    const data = await this.authService.verifyUser(request, userAgent);
-    const user = await this.userService.findOne(data.id);
-    user['accessToken'] = data.accessToken;
+  ): Promise<{ status: boolean; message: string }> {
+    await this.userService.verifyTempUser(request);
     return {
       status: true,
       message: 'User successfully verified',
-      data: user,
     };
   }
 
   /**
-   * Handles resending the email verification.
+   * Resends the email verification for user pre-registration.
    *
-   * @param request - The request body containing the email address.
-   * @returns An object containing the status and a message indicating the email verification was sent.
+   * @param {EmailDto} request - DTO containing the email address.
+   * @returns {Promise<{ status: boolean, message: string }>} Status and message.
    */
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
   @Post('verify/resend')
-  async sendEmailVerification(@Body() request: EmailDto) {
-    await this.authService.sendEmailVerificationMail(request);
+  async sendEmailVerification(
+    @Body() request: EmailDto,
+  ): Promise<{ status: boolean; message: string }> {
+    await this.userService.createTempUser(request);
     return {
       status: true,
       message: 'Email verification successfully sent to ' + request.email,

@@ -44,23 +44,33 @@ export class NotificationGeneratorService {
   }
 
   /**
-   * Sends an email verification email.
-   * @param request - NotificationGeneratorDto containing necessary data.
-   * @param code - Verification code to be included in the email.
+   * Sends a verification email to the specified address.
+   *
+   * @param {NotificationGeneratorDto} request - DTO containing notification details.
+   * @param {string} email - The recipient's email address.
+   * @param {string} code - The verification code to include in the email.
    */
-  async sendVerificationMail(request: NotificationGeneratorDto, code: string) {
+  async sendVerificationMail(
+    request: NotificationGeneratorDto,
+    email: string,
+    code: string,
+  ): Promise<void> {
     const mail: EmailNotification = {
       subject: `Email Verification from ${this.preference.appName}`,
-      message: `<p> Welcome to ${this.preference.appName}</p> 
-    <p>We're thrilled to have you on board. To get started and enjoy all the features we offer, we'll need to verify your email address. <br><br>
+      message: `<p>Welcome to ${this.preference.appName}</p>
+      <p>We're thrilled to have you on board. To get started and enjoy all the features we offer, we'll need to verify your email address. <br><br>
       Please use the below code to gain access to your account <br><br>
       <h2><strong>${code}</strong></h2>`,
       preference: this.preference,
+      emailAddress: email,
+      fullName: 'sir/ma',
     };
+
     const notification: NotificationDto = {
       message: { mail },
       ...request,
     };
+
     this.notificationQueue.add('notification', notification);
   }
 

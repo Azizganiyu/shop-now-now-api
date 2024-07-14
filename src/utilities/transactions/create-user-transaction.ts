@@ -60,6 +60,7 @@ export class CreateUserTransaction extends BaseTransaction<
       roleId: data.roleId,
       code: await this.helperService.encrypt(this.helperService.generateCode()),
       tokenExpireAt: this.helperService.setDateFuture(3600),
+      verifiedAt: new Date(),
     };
 
     // Save the user entity to the database
@@ -76,12 +77,6 @@ export class CreateUserTransaction extends BaseTransaction<
       objectId: createdUser.id,
     };
     await manager.save(Activity, activity);
-
-    // Send verification email to the user
-    await this.notificationGenerator.sendVerificationMail(
-      { userId: createdUser.id, channels: ['email'] },
-      await this.helperService.decrypt(createdUser.code),
-    );
 
     return createdUser;
   }

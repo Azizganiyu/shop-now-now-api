@@ -64,6 +64,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     //validate session
     await this.sessionService.validateSession();
 
+    //set role
+    this.requestContext.roleTag = user.role.tag;
+
     if (!user.twoFactorAuthentication) {
       return {
         ...user,
