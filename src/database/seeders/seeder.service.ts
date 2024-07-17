@@ -11,14 +11,7 @@ import { ProductStrengthUnitSeed } from './seeds/product-strength-unit.seed';
 
 @Injectable()
 export class SeederService {
-  private seeds = [
-    ProductCategorySeed,
-    ProductSubCategorySeed,
-    ProductManufacturerSeed,
-    ProductPresentationSeed,
-    ProductPackUnitSeed,
-    ProductStrengthUnitSeed,
-  ];
+  private seeds = [RoleSeed, AdminSeed];
   // private seeds = [
   //   RoleSeed,
   //   AdminSeed,
