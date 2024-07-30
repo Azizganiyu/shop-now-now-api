@@ -17,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from 'src/modules/auth/decorator/roles.decorator';
@@ -67,6 +68,7 @@ export class ProductCategoryController {
   @ApiOkResponse({ type: ProductCategoryResponse })
   @HttpCode(200)
   @Get(':id')
+  @ApiParam({ name: 'id', description: 'Category ID' })
   async findOne(
     @Param('id') id: string,
   ): Promise<{ status: boolean; message: string; data: any }> {
@@ -109,6 +111,7 @@ export class ProductCategoryController {
   @Roles('admin')
   @ApiOkResponse({ type: ProductCategoryResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -130,7 +133,8 @@ export class ProductCategoryController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @Patch(':id/activate')
   async activate(
     @Param('id') id: string,
@@ -150,7 +154,8 @@ export class ProductCategoryController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @Patch(':id/deactivate')
   async deactivate(
     @Param('id') id: string,
@@ -171,6 +176,7 @@ export class ProductCategoryController {
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Category ID' })
   @Delete(':id')
   async remove(
     @Param('id') id: string,

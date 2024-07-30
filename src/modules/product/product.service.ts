@@ -6,6 +6,10 @@ import { RequestContextService } from 'src/utilities/request-context.service';
 import { HelperService } from 'src/utilities/helper.service';
 import { Product } from './entities/product.entity';
 import { CreateProduct, UpdateProduct } from './dto/product-create.dto';
+import { PageOptionsDto } from 'src/utilities/pagination/dtos';
+import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
+import { PageDto } from 'src/utilities/pagination/page.dto';
+import { FindProductDto } from './dto/find-product.dto';
 
 @Injectable()
 export class ProductService {
@@ -24,12 +28,29 @@ export class ProductService {
    *
    * @returns List of products based on user role.
    */
-  async findAll() {
-    return this.requestContext.roleTag === RoleTag.admin
-      ? await this.productRepository.find()
-      : await this.productRepository.findBy({
+  async findAll(filter: FindProductDto, pageOptionsDto: PageOptionsDto) {
+    const products = this.productRepository
+      .createQueryBuilder('product')
+      .andWhere(
+        this.requestContext.roleTag === RoleTag.user
+          ? `product.status = :status`
+          : '1=1',
+        {
           status: true,
-        });
+        },
+      )
+      .andWhere(filter.from ? `product.createdAt >= :fromDate` : '1=1', {
+        fromDate: filter.from,
+      })
+      .andWhere(filter.to ? `product.createdAt <= :toDate` : '1=1', {
+        toDate: filter.to,
+      })
+      .orderBy('product.createdAt', pageOptionsDto.order);
+
+    const itemCount = await products.getCount();
+    const { entities } = await products.getRawAndEntities();
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 
   /**

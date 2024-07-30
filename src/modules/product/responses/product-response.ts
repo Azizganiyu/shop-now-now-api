@@ -1,5 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/modules/misc/responses/api-response.dto';
+import {
+  ApiResponseDto,
+  MetaResponseDto,
+} from 'src/modules/misc/responses/api-response.dto';
 import {
   DescriptorResponse,
   DescriptorResponseWithcategoryId,
@@ -87,7 +90,15 @@ export class ProductResponse extends ApiResponseDto {
   data: ProductDataResponse;
 }
 
-export class ProductResponseAll extends ApiResponseDto {
+class ProductResponseFind {
   @ApiProperty({ type: ProductDataResponse, isArray: true })
   data: ProductDataResponse[];
+
+  @ApiProperty()
+  meta: MetaResponseDto;
+}
+
+export class ProductResponseAll extends ApiResponseDto {
+  @ApiProperty({ type: ProductResponseFind })
+  data: ProductResponseFind;
 }

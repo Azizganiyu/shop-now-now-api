@@ -22,6 +22,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
@@ -74,6 +75,7 @@ export class ProductSubCategoryController {
    */
   @ApiOkResponse({ type: ProductSubCategoryResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Sub category ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.subCategoryService.findOne(id);
@@ -113,6 +115,7 @@ export class ProductSubCategoryController {
   @Roles('admin')
   @ApiOkResponse({ type: ProductSubCategoryResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Sub category ID' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -134,7 +137,8 @@ export class ProductSubCategoryController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @ApiParam({ name: 'id', description: 'Sub category ID' })
+  @HttpCode(200)
   @Patch(':id/activate')
   async activate(@Param('id') id: string) {
     await this.subCategoryService.activate(id);
@@ -152,7 +156,8 @@ export class ProductSubCategoryController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @ApiParam({ name: 'id', description: 'Sub category ID' })
+  @HttpCode(200)
   @Patch(':id/deactivate')
   async deactivate(@Param('id') id: string) {
     await this.subCategoryService.deactivate(id);
@@ -171,6 +176,7 @@ export class ProductSubCategoryController {
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Sub category ID' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
     await this.subCategoryService.remove(id);

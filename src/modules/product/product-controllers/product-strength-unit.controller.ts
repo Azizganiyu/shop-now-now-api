@@ -21,6 +21,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from 'src/modules/auth/decorator/roles.decorator';
@@ -68,6 +69,7 @@ export class ProductStrengthUnitController {
    */
   @ApiOkResponse({ type: ProductStrengthUnitResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Strength Unit ID' })
   @Get(':id')
   async findOne(
     @Param('id') id: string,
@@ -111,6 +113,7 @@ export class ProductStrengthUnitController {
   @Roles('admin')
   @ApiOkResponse({ type: ProductStrengthUnitResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Strength Unit ID' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -132,7 +135,8 @@ export class ProductStrengthUnitController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Strength Unit ID' })
   @Patch(':id/activate')
   async activate(
     @Param('id') id: string,
@@ -152,7 +156,8 @@ export class ProductStrengthUnitController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Strength Unit ID' })
   @Patch(':id/deactivate')
   async deactivate(
     @Param('id') id: string,
@@ -173,6 +178,7 @@ export class ProductStrengthUnitController {
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Strength Unit ID' })
   @Delete(':id')
   async remove(
     @Param('id') id: string,

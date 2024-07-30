@@ -30,6 +30,9 @@ import { ApiLog } from './modules/activity/entities/api-logs.entity';
 import { validate } from './configs/env.validation';
 import { ormConfig } from 'datasource';
 import { ProductModule } from './modules/product/product.module';
+import { CartModule } from './modules/cart/cart.module';
+import { AddressModule } from './modules/address/address.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
   imports: [
@@ -64,6 +67,9 @@ import { ProductModule } from './modules/product/product.module';
     UserModule,
     MiscModule,
     ProductModule,
+    CartModule,
+    OrderModule,
+    AddressModule,
   ],
   controllers: [AppController],
   providers: [

@@ -21,6 +21,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from 'src/modules/auth/decorator/roles.decorator';
@@ -68,6 +69,7 @@ export class ProductPresentationController {
    */
   @ApiOkResponse({ type: ProductPresentationResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Presentation ID' })
   @Get(':id')
   async findOne(
     @Param('id') id: string,
@@ -111,6 +113,7 @@ export class ProductPresentationController {
   @Roles('admin')
   @ApiOkResponse({ type: ProductPresentationResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Presentation ID' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -132,7 +135,8 @@ export class ProductPresentationController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Presentation ID' })
   @Patch(':id/activate')
   async activate(
     @Param('id') id: string,
@@ -152,7 +156,8 @@ export class ProductPresentationController {
    */
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
-  @HttpCode(201)
+  @ApiParam({ name: 'id', description: 'Presentation ID' })
+  @HttpCode(200)
   @Patch(':id/deactivate')
   async deactivate(
     @Param('id') id: string,
@@ -173,6 +178,7 @@ export class ProductPresentationController {
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Presentation ID' })
   @Delete(':id')
   async remove(
     @Param('id') id: string,

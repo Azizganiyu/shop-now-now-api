@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -16,6 +17,7 @@ import {
   ApiBearerAuth,
   ApiCreatedResponse,
   ApiOkResponse,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { Roles } from 'src/modules/auth/decorator/roles.decorator';
@@ -28,6 +30,8 @@ import {
   ProductResponse,
   ProductResponseAll,
 } from './responses/product-response';
+import { FindProductDto } from './dto/find-product.dto';
+import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user')
@@ -41,8 +45,11 @@ export class ProductController {
   @ApiOkResponse({ type: ProductResponseAll })
   @HttpCode(200)
   @Get()
-  async findAll() {
-    const data = await this.productService.findAll();
+  async findAll(
+    @Query() filter: FindProductDto,
+    @Query() pageOptionsdto: PageOptionsDto,
+  ) {
+    const data = await this.productService.findAll(filter, pageOptionsdto);
     return {
       status: true,
       message: 'products retreived',
@@ -52,6 +59,7 @@ export class ProductController {
 
   @ApiOkResponse({ type: ProductResponse })
   @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Product ID' })
   @Get(':id')
   async findOne(@Param('id') id: string) {
     const data = await this.productService.findOne(id);
@@ -77,6 +85,7 @@ export class ProductController {
 
   @Roles('admin')
   @ApiOkResponse({ type: ProductResponse })
+  @ApiParam({ name: 'id', description: 'Product ID' })
   @HttpCode(200)
   @Put(':id')
   async update(@Param('id') id: string, @Body() request: UpdateProduct) {
@@ -90,6 +99,7 @@ export class ProductController {
 
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
+  @ApiParam({ name: 'id', description: 'Product ID' })
   @HttpCode(201)
   @Patch(':id/activate')
   async activate(@Param('id') id: string) {
@@ -102,6 +112,7 @@ export class ProductController {
 
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
+  @ApiParam({ name: 'id', description: 'Product ID' })
   @HttpCode(201)
   @Patch(':id/deactivate')
   async deactivate(@Param('id') id: string) {
@@ -114,6 +125,7 @@ export class ProductController {
 
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
+  @ApiParam({ name: 'id', description: 'Product ID' })
   @HttpCode(200)
   @Delete(':id')
   async remove(@Param('id') id: string) {
