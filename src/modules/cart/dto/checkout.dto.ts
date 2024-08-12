@@ -1,11 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDefined,
-  IsEnum,
-  IsNotEmpty,
-  IsOptional,
-  ValidateIf,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDefined, IsEnum, IsNotEmpty, ValidateIf } from 'class-validator';
 import { OrderTypes } from 'src/modules/order/dto/order.dto';
 
 export enum DurationType {
@@ -15,6 +9,11 @@ export enum DurationType {
 }
 
 export class CartCheckout {
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  paymentRef: string;
+
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
@@ -41,8 +40,4 @@ export class CartCheckout {
   @IsDefined()
   @IsNotEmpty()
   duration?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  orderRef?: string;
 }

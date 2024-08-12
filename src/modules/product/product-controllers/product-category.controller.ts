@@ -34,7 +34,7 @@ import {
 } from '../responses/product-descriptor-response';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
+@Roles('user')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Product Category')

@@ -33,7 +33,7 @@ import { ApiResponseDto } from '../misc/responses/api-response.dto';
 import { UserFindResponseDto } from './responses/find-user-response.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
+@Roles('user')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('User')

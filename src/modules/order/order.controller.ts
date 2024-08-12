@@ -30,7 +30,7 @@ import {
 } from './order-responses';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
+@Roles('user')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Order')

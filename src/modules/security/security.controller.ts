@@ -22,7 +22,7 @@ import { Authenticate2FAResponseDto } from './responses/authenticate-2fa-respons
 import { Setup2FAResponseDto } from './responses/setup-2fa-response.dto copy';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
+@Roles('user')
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Security')
 @Controller('settings/security')

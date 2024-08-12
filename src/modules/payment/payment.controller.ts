@@ -56,7 +56,7 @@ export class PaymentController {
     const data = await this.paymentService.verify(request, user);
     return {
       status: true,
-      message: 'initialization successful',
+      message: 'verification successful',
       data,
     };
   }

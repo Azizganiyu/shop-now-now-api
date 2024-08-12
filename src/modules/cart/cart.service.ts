@@ -90,9 +90,7 @@ export class CartService {
             {
               orderId: order.id,
               adressId: checkout.addressId,
-              orderRef:
-                checkout.orderRef ??
-                'INV' + this.helperService.generateRandomAlphaNum(8),
+              orderRef: 'INV' + this.helperService.generateRandomAlphaNum(8),
               duration: DeliveryGeneralEstimate.duration,
               expectedDeliveryDate: this.helperService.setDateFuture(
                 DeliveryGeneralEstimate.duration * 86400,
@@ -100,6 +98,9 @@ export class CartService {
             },
           );
           await transactionalEntityManager.save(OrderShipment, createShipment);
+
+          //use the paymentRef to create initial transaction
+
           return await transactionalEntityManager.findOne(Order, {
             where: { id: order.id },
           });
