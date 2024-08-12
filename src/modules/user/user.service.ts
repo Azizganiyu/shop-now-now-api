@@ -21,6 +21,7 @@ import { EmailDto } from '../auth/dto/email-verify.dto';
 import { TempUser } from './entities/temp-user.entity';
 import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 import { VerifyDto } from '../auth/dto/verify.dto';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 
 @Injectable()
 export class UserService {
@@ -53,7 +54,9 @@ export class UserService {
     await this.checkEmail(request.email);
 
     //validate email
-    await this.validateTempUser({ email: request.email });
+    if (request.roleId == 'user') {
+      await this.validateTempUser({ email: request.email });
+    }
 
     // Execute the transaction to create a new user
     return await this.createUserTransaction.run(data);
@@ -301,5 +304,10 @@ export class UserService {
     }
 
     return await this.tempUserRepository.delete(user.id);
+  }
+
+  async update(id: string, data: QueryDeepPartialEntity<User>) {
+    await this.userRepository.update(id, data);
+    return await this.findOne(id);
   }
 }

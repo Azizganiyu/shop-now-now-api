@@ -33,6 +33,9 @@ import { ProductModule } from './modules/product/product.module';
 import { CartModule } from './modules/cart/cart.module';
 import { AddressModule } from './modules/address/address.module';
 import { OrderModule } from './modules/order/order.module';
+import { StaffModule } from './modules/staff/staff.module';
+import paystackConfig from './configs/paystack.config';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [
@@ -54,7 +57,14 @@ import { OrderModule } from './modules/order/order.module';
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [authConfig, appConfig, bullConfig, mailConfig, redisConfig],
+      load: [
+        authConfig,
+        appConfig,
+        bullConfig,
+        mailConfig,
+        redisConfig,
+        paystackConfig,
+      ],
       expandVariables: true,
       validate,
     }),
@@ -70,6 +80,8 @@ import { OrderModule } from './modules/order/order.module';
     CartModule,
     OrderModule,
     AddressModule,
+    StaffModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [

@@ -5,15 +5,12 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
-import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
-import { Exclude } from 'class-transformer';
 
 @Entity()
-export class Address {
+export class PaymentAuth {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -21,28 +18,24 @@ export class Address {
   @ApiProperty()
   userId: string;
 
-  @ManyToOne(() => User, (user) => user.addresses)
+  @ManyToOne(() => User, (user) => user.carts)
   user?: User;
 
-  @Column()
+  @Column({ type: 'text' })
   @ApiProperty()
-  country: string;
+  auth: string;
 
   @Column()
   @ApiProperty()
-  state: string;
+  email: string;
 
   @Column()
   @ApiProperty()
-  city: string;
+  provider: string;
 
-  @Column()
+  @Column({ type: 'text' })
   @ApiProperty()
-  address: string;
-
-  @OneToMany(() => OrderShipment, (item) => item.address)
-  @Exclude()
-  shipments?: OrderShipment[];
+  description: string;
 
   @CreateDateColumn()
   @ApiProperty()

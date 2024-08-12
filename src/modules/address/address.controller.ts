@@ -28,7 +28,7 @@ import { User } from '../user/entities/user.entity';
 import { CreateAddress, UpdateAddress } from './dto/address-create.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user')
+@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Address')

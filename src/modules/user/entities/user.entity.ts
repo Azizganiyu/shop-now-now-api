@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Transform } from 'class-transformer';
 import { Activity } from 'src/modules/activity/entities/activity.entity';
+import { Address } from 'src/modules/address/entities/address.entity';
 import { Ssions } from 'src/modules/auth/entities/ssions.entity';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { NotificationReadReceipt } from 'src/modules/notification/entities/notification-read-receipt.entity';
@@ -115,6 +116,10 @@ export class User {
   @OneToMany(() => Cart, (cart) => cart.user)
   @Exclude()
   carts?: Cart[];
+
+  @OneToMany(() => Address, (address) => address.user)
+  @Exclude()
+  addresses?: Address[];
 
   @ApiProperty()
   @Column({ default: 'active' })

@@ -44,3 +44,24 @@ export class CreateUserDto {
   @ApiProperty()
   password: string;
 }
+
+export class UpdateUserDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @MaxLength(199)
+  @MinLength(3)
+  firstName?: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @MaxLength(199)
+  @MinLength(3)
+  lastName?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  @MaxLength(199)
+  phone?: string;
+}
