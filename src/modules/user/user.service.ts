@@ -98,11 +98,11 @@ export class UserService {
       .andWhere(filter.status ? `user.status = :status` : '1=1', {
         status: filter.status,
       })
-      .andWhere(filter.admin ? `role.tag = :role` : '1=1', {
-        role: 'admin',
+      .andWhere(filter.admin ? `role.tag = :admin` : '1=1', {
+        admin: 'admin',
       })
-      .andWhere(!filter.admin ? `role.tag = :role` : '1=1', {
-        role: 'user',
+      .andWhere(!filter.admin ? `role.tag = :user` : '1=1', {
+        user: 'user',
       })
       .andWhere(filter.from ? `user.createdAt >= :fromDate` : '1=1', {
         fromDate: filter.from,
