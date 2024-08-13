@@ -28,6 +28,7 @@ import {
   OrderResponseAll,
   ShipmentResponseAll,
 } from './order-responses';
+import { RoleTag } from 'src/constants/roletag';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user', 'admin')
@@ -46,7 +47,9 @@ export class OrderController {
     @Query() filter: FindOrderDto,
     @Query() pageOptionDto: PageOptionsDto,
   ) {
-    filter.userId = user.id;
+    if (user.role.tag == RoleTag.user) {
+      filter.userId = user.id;
+    }
     const data = await this.orderService.findOrders(filter, pageOptionDto);
     return {
       status: true,
@@ -63,7 +66,9 @@ export class OrderController {
     @Query() pageOptionDto: PageOptionsDto,
     @Query() filter: FindShipmentDto,
   ) {
-    filter.userId = user.id;
+    if (user.role.tag == RoleTag.user) {
+      filter.userId = user.id;
+    }
     const data = await this.orderService.findShipment(filter, pageOptionDto);
     return {
       status: true,

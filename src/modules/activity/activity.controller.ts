@@ -16,6 +16,7 @@ import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { Userx } from '../../decorator/userx.decorator';
 import { User } from '../user/entities/user.entity';
 import { ActivitiesResponseDto } from './responses/find-activity-response.dto';
+import { RoleTag } from 'src/constants/roletag';
 
 @ApiBearerAuth('JWT-auth')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -41,7 +42,9 @@ export class ActivityController {
     @Query() filter: ActivityDto,
     @Query() pageOptionsDto: PageOptionsDto,
   ) {
-    filter.userId = user.id;
+    if (user.role.tag == RoleTag.user) {
+      filter.userId = user.id;
+    }
     const data = await this.activityService.findAll(filter, pageOptionsDto);
     return {
       status: true,

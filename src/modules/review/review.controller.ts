@@ -20,6 +20,7 @@ import { CreateReviewDto } from './dto/create-review.dto';
 import { ApiResponseDto } from '../misc/responses/api-response.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { FindReviewsDto } from './dto/find-reviews.dto';
+import { RoleTag } from 'src/constants/roletag';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user', 'admin')
@@ -30,6 +31,7 @@ import { FindReviewsDto } from './dto/find-reviews.dto';
 export class ReviewController {
   constructor(private reviewService: ReviewService) {}
 
+  @Roles('user')
   @ApiCreatedResponse({ status: 201, type: ApiResponseDto })
   @HttpCode(201)
   @Post()
@@ -49,7 +51,9 @@ export class ReviewController {
     @Query() filter: FindReviewsDto,
     @Query() pageOptionDto: PageOptionsDto,
   ) {
-    filter.userId = user.id;
+    if (user.role.tag == RoleTag.user) {
+      filter.userId = user.id;
+    }
     await this.reviewService.findAll(filter, pageOptionDto);
     return {
       status: true,

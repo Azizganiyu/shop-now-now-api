@@ -66,6 +66,7 @@ export class UserController {
    * @param request - The email address provided for verification.
    * @throws BadRequestException if the provided email does not match the user's email.
    */
+  @Roles('user')
   @ApiOkResponse({ status: 200, type: ApiResponseDto })
   @HttpCode(200)
   @Delete('account/delete')

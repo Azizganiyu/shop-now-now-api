@@ -31,7 +31,7 @@ import { CartCheckout } from './dto/checkout.dto';
 import { OrderResponse } from '../order/order-responses';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
+@Roles('user')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Cart')
