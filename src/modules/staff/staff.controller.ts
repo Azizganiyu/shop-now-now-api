@@ -33,7 +33,7 @@ import { RoleTag } from 'src/constants/roletag';
 @Roles('admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
-@ApiTags('User')
+@ApiTags('Staff')
 @Controller('staff')
 export class StaffController {
   constructor(private readonly userService: UserService) {}
