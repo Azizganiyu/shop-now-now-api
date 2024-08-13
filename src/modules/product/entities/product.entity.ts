@@ -17,6 +17,7 @@ import { ProductManufacturer } from './product-manufacturer.entity';
 import { Exclude } from 'class-transformer';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { OrderItem } from 'src/modules/order/entities/order-item.entity';
+import { ProductReview } from 'src/modules/review/entities/review.entity';
 
 @Entity()
 export class Product {
@@ -104,6 +105,10 @@ export class Product {
   @OneToMany(() => Cart, (cart) => cart.product)
   @Exclude()
   carts?: Cart[];
+
+  @OneToMany(() => ProductReview, (review) => review.product)
+  @Exclude()
+  reviews?: ProductReview[];
 
   @OneToMany(() => OrderItem, (item) => item.product)
   @Exclude()

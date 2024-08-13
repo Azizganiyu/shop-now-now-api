@@ -6,6 +6,7 @@ import { Ssions } from 'src/modules/auth/entities/ssions.entity';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { NotificationReadReceipt } from 'src/modules/notification/entities/notification-read-receipt.entity';
 import { Notification } from 'src/modules/notification/entities/notification.entity';
+import { ProductReview } from 'src/modules/review/entities/review.entity';
 import { Role } from 'src/modules/role/entities/role.entity';
 import {
   Column,
@@ -116,6 +117,10 @@ export class User {
   @OneToMany(() => Cart, (cart) => cart.user)
   @Exclude()
   carts?: Cart[];
+
+  @OneToMany(() => ProductReview, (review) => review.user)
+  @Exclude()
+  reviews?: ProductReview[];
 
   @OneToMany(() => Address, (address) => address.user)
   @Exclude()

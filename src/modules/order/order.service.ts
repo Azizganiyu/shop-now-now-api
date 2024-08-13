@@ -81,4 +81,18 @@ export class OrderService {
     const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
     return new PageDto(entities, pageMetaDto);
   }
+
+  async userHasOrdered(userId: string, productId: string) {
+    const count = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.items', 'orderItem')
+      .where('order.userId = :userId', { userId })
+      .andWhere('orderItem.productId = :productId', { productId })
+      .getCount();
+
+    if (count > 0) {
+      return true;
+    }
+    return false;
+  }
 }

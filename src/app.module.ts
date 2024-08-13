@@ -36,6 +36,7 @@ import { OrderModule } from './modules/order/order.module';
 import { StaffModule } from './modules/staff/staff.module';
 import paystackConfig from './configs/paystack.config';
 import { PaymentModule } from './modules/payment/payment.module';
+import { ReviewModule } from './modules/review/review.module';
 
 @Module({
   imports: [
@@ -82,6 +83,7 @@ import { PaymentModule } from './modules/payment/payment.module';
     AddressModule,
     StaffModule,
     PaymentModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [
