@@ -22,7 +22,7 @@ import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { FindReviewsDto } from './dto/find-reviews.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user')
+@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @ApiTags('Reviews')
 @UseInterceptors(ClassSerializerInterceptor)

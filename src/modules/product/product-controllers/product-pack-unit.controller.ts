@@ -34,7 +34,7 @@ import { RolesGuard } from 'src/modules/auth/guards/roles.guard';
 import { JwtAuthGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user')
+@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Product Pack Unit')

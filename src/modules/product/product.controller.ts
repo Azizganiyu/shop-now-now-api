@@ -34,7 +34,7 @@ import { FindProductDto } from './dto/find-product.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user')
+@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Products')
