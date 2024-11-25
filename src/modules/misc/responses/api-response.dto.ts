@@ -5,7 +5,7 @@ export class ApiResponseDto {
   status: boolean;
 
   @ApiProperty()
-  statusCode: number;
+  statusCode?: number;
 
   @ApiProperty()
   message: string;

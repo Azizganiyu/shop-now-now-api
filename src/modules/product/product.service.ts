@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { RoleTag } from 'src/constants/roletag';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { RequestContextService } from 'src/utilities/request-context.service';
 import { HelperService } from 'src/utilities/helper.service';
 import { Product } from './entities/product.entity';
@@ -38,6 +38,48 @@ export class ProductService {
         {
           status: true,
         },
+      )
+      .andWhere(
+        filter.categoryId ? `product.categoryId >= :categoryId` : '1=1',
+        {
+          categoryId: filter.categoryId,
+        },
+      )
+      .andWhere(
+        filter.subCategoryId
+          ? `product.subCategoryId >= :subCategoryId`
+          : '1=1',
+        {
+          subCategoryId: filter.subCategoryId,
+        },
+      )
+      .andWhere(
+        filter.manufacturerId
+          ? `product.manufacturerId >= :manufacturerId`
+          : '1=1',
+        {
+          manufacturerId: filter.manufacturerId,
+        },
+      )
+      .andWhere(
+        filter.fromPrice ? `product.sellingPrice >= :fromPrice` : '1=1',
+        {
+          fromPrice: filter.fromPrice,
+        },
+      )
+      .andWhere(filter.toPrice ? `product.sellingPrice <= :toPrice` : '1=1', {
+        toPrice: filter.toPrice,
+      })
+      .andWhere(
+        filter.search
+          ? new Brackets((qb) => {
+              qb.where('product.name like :name', {
+                name: '%' + filter.search + '%',
+              }).orWhere('product.description like :description', {
+                description: '%' + filter.search + '%',
+              });
+            })
+          : '1=1',
       )
       .andWhere(filter.from ? `product.createdAt >= :fromDate` : '1=1', {
         fromDate: filter.from,

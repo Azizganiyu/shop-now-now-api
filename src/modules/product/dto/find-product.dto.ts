@@ -5,7 +5,31 @@ import { IsOptional } from 'class-validator';
 export class FindProductDto {
   @ApiPropertyOptional()
   @IsOptional()
+  categoryId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  subCategoryId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  manufacturerId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  fromPrice?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  toPrice?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   status?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  search?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -37,6 +37,8 @@ import { StaffModule } from './modules/staff/staff.module';
 import paystackConfig from './configs/paystack.config';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
+import { MedicationRequestModule } from './modules/medication-request/medication-request.module';
+import { HealthCalculatorModule } from './modules/health-calculator/health-calculator.module';
 
 @Module({
   imports: [
@@ -84,6 +86,8 @@ import { ReviewModule } from './modules/review/review.module';
     StaffModule,
     PaymentModule,
     ReviewModule,
+    MedicationRequestModule,
+    HealthCalculatorModule,
   ],
   controllers: [AppController],
   providers: [
