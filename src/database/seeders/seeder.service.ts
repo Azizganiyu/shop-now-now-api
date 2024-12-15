@@ -12,18 +12,18 @@ import { ProductSeed } from './seeds/product.seed';
 
 @Injectable()
 export class SeederService {
-  private seeds = [ProductSeed];
-  // private seeds = [
-  //   RoleSeed,
-  //   AdminSeed,
-  //   ProductCategorySeed,
-  //   ProductSubCategorySeed,
-  //   ProductManufacturerSeed,
-  //   ProductPresentationSeed,
-  //   ProductPackUnitSeed,
-  //   ProductStrengthUnitSeed,
-  //   ProductSeed,
-  // ];
+  // private seeds = [ProductSeed];
+  private seeds = [
+    RoleSeed,
+    AdminSeed,
+    ProductCategorySeed,
+    ProductSubCategorySeed,
+    ProductManufacturerSeed,
+    ProductPresentationSeed,
+    ProductPackUnitSeed,
+    ProductStrengthUnitSeed,
+    ProductSeed,
+  ];
 
   constructor(
     private readonly logger: Logger,
