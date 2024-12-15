@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -166,6 +168,22 @@ export class AuthService {
     }
     if (user.status == 'suspended') {
       throw new UnauthorizedException('Account suspended');
+    }
+    if (!user.emailVerifiedAt) {
+      this.notificationGenerator.sendVerificationMail(
+        { channels: ['email'] },
+        email,
+        await this.helperService.decrypt(user.code),
+      );
+      throw new HttpException(
+        {
+          status: HttpStatus.EXPECTATION_FAILED,
+          message:
+            'Email not verified, a verification mail has been sent to ' +
+            user.email,
+        },
+        HttpStatus.EXPECTATION_FAILED,
+      );
     }
     const expired = this.helperService.checkExpired(user.loginRetryTime);
     if (!expired) {

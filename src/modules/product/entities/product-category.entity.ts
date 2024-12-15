@@ -18,6 +18,12 @@ export class ProductCategory {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  imageUrl?: string;
+
+  @Column({ nullable: true })
+  iconUrl?: string;
+
   @Column({ nullable: true, type: 'text' })
   description?: string;
 

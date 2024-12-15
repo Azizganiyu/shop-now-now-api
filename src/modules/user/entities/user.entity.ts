@@ -77,7 +77,7 @@ export class User {
 
   @ApiProperty()
   @Column({ nullable: true })
-  verifiedAt?: Date;
+  emailVerifiedAt?: Date;
 
   @ApiProperty()
   @Column({ default: false })

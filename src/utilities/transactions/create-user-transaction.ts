@@ -5,9 +5,9 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { HelperService } from '../helper.service';
 import { Activity } from 'src/modules/activity/entities/activity.entity';
-import { NotificationGeneratorService } from 'src/modules/notification/notification-generator/notification-generator.service';
 import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
 import { User } from 'src/modules/user/entities/user.entity';
+import { UserRole } from 'src/modules/user/dto/user.dto';
 
 @Injectable()
 export class CreateUserTransaction extends BaseTransaction<
@@ -18,7 +18,6 @@ export class CreateUserTransaction extends BaseTransaction<
     dataSource: DataSource,
     private configService: ConfigService,
     private helperService: HelperService,
-    private notificationGenerator: NotificationGeneratorService,
   ) {
     super(dataSource);
   }
@@ -60,7 +59,7 @@ export class CreateUserTransaction extends BaseTransaction<
       roleId: data.roleId,
       code: await this.helperService.encrypt(this.helperService.generateCode()),
       tokenExpireAt: this.helperService.setDateFuture(3600),
-      verifiedAt: new Date(),
+      emailVerifiedAt: data.roleId === UserRole.user ? null : new Date(),
     };
 
     // Save the user entity to the database

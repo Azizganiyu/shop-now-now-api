@@ -33,12 +33,10 @@ import {
   ProductCategoryResponseAll,
 } from '../responses/product-descriptor-response';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Product Category')
-@Controller('product/category')
+@Controller('category')
 export class ProductCategoryController {
   constructor(private readonly categoryService: ProductCategoryService) {}
 
@@ -86,6 +84,7 @@ export class ProductCategoryController {
    * @param {CreateProductCategory} request - The request body containing the details of the new category.
    * @returns {Promise<{ status: boolean, message: string, data: any }>} The status, message, and data containing the created category.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiCreatedResponse({ type: ProductCategoryResponse })
   @HttpCode(201)
@@ -108,6 +107,7 @@ export class ProductCategoryController {
    * @param {UpdateProductCategory} request - The request body containing the updated details of the category.
    * @returns {Promise<{ status: boolean, message: string, data: any }>} The status, message, and data containing the updated category.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ProductCategoryResponse })
   @HttpCode(200)
@@ -131,6 +131,7 @@ export class ProductCategoryController {
    * @param {string} id - The ID of the category to activate.
    * @returns {Promise<{ status: boolean, message: string }>} The status and message.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
@@ -152,6 +153,7 @@ export class ProductCategoryController {
    * @param {string} id - The ID of the category to deactivate.
    * @returns {Promise<{ status: boolean, message: string }>} The status and message.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
@@ -173,6 +175,7 @@ export class ProductCategoryController {
    * @param {string} id - The ID of the category to delete.
    * @returns {Promise<{ status: boolean, message: string }>} The status and message.
    */
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)

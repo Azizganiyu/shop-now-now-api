@@ -2,16 +2,16 @@ import { ProductSubCategory } from 'src/modules/product/entities/product-sub-cat
 import { ISeeder } from '../seed.interface';
 
 const values: ProductSubCategory[] = [
-  {
-    id: 'fertility',
-    name: 'Fertility',
-    categoryId: 'sexual-health',
-  },
-  {
-    id: 'cough-cold',
-    name: 'Cough & Cold',
-    categoryId: 'flu-medications',
-  },
+  // {
+  //   id: 'fertility',
+  //   name: 'Fertility',
+  //   categoryId: 'sexual-health',
+  // },
+  // {
+  //   id: 'cough-cold',
+  //   name: 'Cough & Cold',
+  //   categoryId: 'flu-medications',
+  // },
 ];
 
 export const ProductSubCategorySeed: ISeeder = {

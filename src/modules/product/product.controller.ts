@@ -33,8 +33,6 @@ import {
 import { FindProductDto } from './dto/find-product.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('user', 'admin')
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Products')
@@ -70,6 +68,7 @@ export class ProductController {
     };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiCreatedResponse({ type: ProductResponse })
   @HttpCode(201)
@@ -83,6 +82,7 @@ export class ProductController {
     };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ProductResponse })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -97,6 +97,7 @@ export class ProductController {
     };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -110,6 +111,7 @@ export class ProductController {
     };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @ApiParam({ name: 'id', description: 'Product ID' })
@@ -123,6 +125,7 @@ export class ProductController {
     };
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('admin')
   @ApiOkResponse({ type: ApiResponseDto })
   @ApiParam({ name: 'id', description: 'Product ID' })

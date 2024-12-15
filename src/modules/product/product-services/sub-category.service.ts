@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   CreateProductSubCategory,
@@ -14,12 +15,15 @@ import { Product } from '../entities/product.entity';
 import { RequestContextService } from 'src/utilities/request-context.service';
 import { RoleTag } from 'src/constants/roletag';
 import { HelperService } from 'src/utilities/helper.service';
+import { ProductCategory } from '../entities/product-category.entity';
 
 @Injectable()
 export class ProductSubCategoryService {
   constructor(
     @InjectRepository(ProductSubCategory)
     private readonly subCategoryRepository: Repository<ProductSubCategory>,
+    @InjectRepository(ProductCategory)
+    private readonly categoryRepository: Repository<ProductCategory>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private requestContext: RequestContextService,
@@ -64,6 +68,12 @@ export class ProductSubCategoryService {
    * @throws BadRequestException if the sub-category name is already taken.
    */
   async create(subCategory: CreateProductSubCategory) {
+    const category = await this.categoryRepository.findOneBy({
+      id: subCategory.categoryId,
+    });
+    if (!category) {
+      throw new NotFoundException('invalid category');
+    }
     const id = this.helperService.idFromName(subCategory.name);
     await this.checkTaken(id);
     const create = await this.subCategoryRepository.create({
@@ -94,6 +104,12 @@ export class ProductSubCategoryService {
    * @returns Updated sub-category object.
    */
   async update(id: string, subCategory: UpdateProductSubCategory) {
+    const category = await this.categoryRepository.findOneBy({
+      id: subCategory.categoryId,
+    });
+    if (!category) {
+      throw new NotFoundException('invalid category');
+    }
     await this.subCategoryRepository.update(id, subCategory);
     return await this.findOne(id);
   }

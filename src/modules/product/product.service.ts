@@ -31,6 +31,7 @@ export class ProductService {
   async findAll(filter: FindProductDto, pageOptionsDto: PageOptionsDto) {
     const products = this.productRepository
       .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
       .andWhere(
         this.requestContext.roleTag === RoleTag.user
           ? `product.status = :status`
@@ -40,7 +41,7 @@ export class ProductService {
         },
       )
       .andWhere(
-        filter.categoryId ? `product.categoryId >= :categoryId` : '1=1',
+        filter.categoryId ? `product.categoryId = :categoryId` : '1=1',
         {
           categoryId: filter.categoryId,
         },

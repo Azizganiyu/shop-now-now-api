@@ -49,7 +49,11 @@ async function bootstrap() {
 
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
 
-  app.use(helmet());
+  app.use(
+    helmet({
+      crossOriginResourcePolicy: false,
+    }),
+  );
 
   app.use(requestContextMiddleware(MyRequestContext));
 
@@ -95,7 +99,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('API')
-    .setDescription('ROCKBALM API DOCUMENTATIONS')
+    .setDescription('Shop Now Now API DOCUMENTATIONS')
     .setVersion('1.0')
     .addBearerAuth(
       {

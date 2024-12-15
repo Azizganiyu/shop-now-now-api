@@ -54,7 +54,7 @@ export class UserResponseDto {
   avatar: string;
 
   @ApiProperty()
-  verifiedAt: Date;
+  emailVerifiedAt: Date;
 
   @ApiProperty()
   twoFactorAuthentication: boolean;

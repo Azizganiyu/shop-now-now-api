@@ -8,10 +8,11 @@ import { ProductManufacturerSeed } from './seeds/product-manufacturer.seed';
 import { ProductPresentationSeed } from './seeds/product-presentation.seed';
 import { ProductPackUnitSeed } from './seeds/product-pack-unit.seed';
 import { ProductStrengthUnitSeed } from './seeds/product-strength-unit.seed';
+import { ProductSeed } from './seeds/product.seed';
 
 @Injectable()
 export class SeederService {
-  private seeds = [RoleSeed, AdminSeed];
+  private seeds = [ProductSeed];
   // private seeds = [
   //   RoleSeed,
   //   AdminSeed,
@@ -21,6 +22,7 @@ export class SeederService {
   //   ProductPresentationSeed,
   //   ProductPackUnitSeed,
   //   ProductStrengthUnitSeed,
+  //   ProductSeed,
   // ];
 
   constructor(

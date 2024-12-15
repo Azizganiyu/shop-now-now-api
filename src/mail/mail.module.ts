@@ -21,7 +21,7 @@ import { MailService } from './services/mail.service';
         },
         defaults: {
           from: {
-            name: 'Rockbalm',
+            name: 'shop-now-now',
             address: configService.get<string>('mail.from'),
           },
         },

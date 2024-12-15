@@ -8,7 +8,7 @@ import { PageDto } from 'src/utilities/pagination/page.dto';
 import { FindUserDto } from './dto/find-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Brackets, IsNull, Not, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { CreateUserTransaction } from 'src/utilities/transactions/create-user-transaction';
@@ -17,19 +17,16 @@ import { Activity } from '../activity/entities/activity.entity';
 import { HelperService } from 'src/utilities/helper.service';
 import { ActivityService } from '../activity/activity.service';
 import { SessionService } from '../auth/session/session.service';
-import { EmailDto } from '../auth/dto/email-verify.dto';
-import { TempUser } from './entities/temp-user.entity';
 import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 import { VerifyDto } from '../auth/dto/verify.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { UserRole } from './dto/user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(TempUser)
-    private tempUserRepository: Repository<TempUser>,
     private requestContext: RequestContextService,
     private createUserTransaction: CreateUserTransaction,
     private helperService: HelperService,
@@ -53,13 +50,22 @@ export class UserService {
     // Check if the email is already in use
     await this.checkEmail(request.email);
 
-    //validate email
-    if (request.roleId == 'user') {
-      await this.validateTempUser({ email: request.email });
+    // Execute the transaction to create a new user
+    const user = await this.createUserTransaction.run(data);
+
+    if (user.roleId === UserRole.user) {
+      await this.sendVerificationMail(user.email, user.code);
     }
 
-    // Execute the transaction to create a new user
-    return await this.createUserTransaction.run(data);
+    return user;
+  }
+
+  async sendVerificationMail(email: string, code: string) {
+    await this.notificationGenerator.sendVerificationMail(
+      { channels: ['email'] },
+      email,
+      await this.helperService.decrypt(code),
+    );
   }
 
   /**
@@ -155,6 +161,17 @@ export class UserService {
     }
   }
 
+  async findOneByEmail(email: string) {
+    try {
+      return await this.userRepository.findOneOrFail({
+        where: { email },
+        relations: ['role'],
+      });
+    } catch (error) {
+      throw new NotFoundException(`User with email ${email} not found`);
+    }
+  }
+
   /**
    * Suspend a user account.
    *
@@ -225,38 +242,13 @@ export class UserService {
   }
 
   /**
-   * Creates a temporary user, sends a verification email, and stores the user data.
-   *
-   * @param {EmailDto} request - DTO containing the email address.
-   * @returns {Promise<void>}
-   */
-  async createTempUser(request: EmailDto): Promise<void> {
-    await this.checkEmail(request.email);
-    await this.tempUserRepository.delete({ email: request.email });
-
-    const create = this.tempUserRepository.create({
-      email: request.email,
-      code: await this.helperService.encrypt(this.helperService.generateCode()),
-      tokenExpireAt: this.helperService.setDateFuture(3600),
-    });
-
-    const temp = await this.tempUserRepository.save(create);
-
-    await this.notificationGenerator.sendVerificationMail(
-      { channels: ['email'] },
-      temp.email,
-      await this.helperService.decrypt(temp.code),
-    );
-  }
-
-  /**
    * Verifies a temporary user by checking the provided code and updating the user data.
    *
    * @param {VerifyDto} request - DTO containing the email and verification code.
    * @throws {BadRequestException} If the code is invalid or expired.
    */
-  async verifyTempUser(request: VerifyDto) {
-    const user = await this.tempUserRepository.findOne({
+  async verifyUserEmail(request: VerifyDto) {
+    const user = await this.userRepository.findOne({
       where: {
         email: request.email,
         code: await this.helperService.encrypt(request.code),
@@ -264,7 +256,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new BadRequestException('Invalid code, user not found');
+      throw new BadRequestException('Invalid code');
     }
 
     const expired = this.helperService.checkExpired(user.tokenExpireAt);
@@ -272,38 +264,9 @@ export class UserService {
       throw new BadRequestException('Code has expired');
     }
 
-    return await this.tempUserRepository.update(user.id, {
-      verifiedAt: new Date(),
-      verificationExpireAt: this.helperService.setDateFuture(3600),
+    return await this.userRepository.update(user.id, {
+      emailVerifiedAt: new Date(),
     });
-  }
-
-  /**
-   * Validates a temporary user by checking if the user is verified and deleting the user if valid.
-   *
-   * @param {EmailDto} request - DTO containing the email address.
-   * @throws {BadRequestException} If the user is not verified or verification has expired.
-   */
-  async validateTempUser(request: EmailDto) {
-    const user = await this.tempUserRepository.findOne({
-      where: {
-        email: request.email,
-        verifiedAt: Not(IsNull()),
-      },
-    });
-
-    if (!user) {
-      throw new BadRequestException(
-        'Error registering user, user is not verified',
-      );
-    }
-
-    const expired = this.helperService.checkExpired(user.verificationExpireAt);
-    if (expired) {
-      throw new BadRequestException('Verification has expired');
-    }
-
-    return await this.tempUserRepository.delete(user.id);
   }
 
   async update(id: string, data: QueryDeepPartialEntity<User>) {

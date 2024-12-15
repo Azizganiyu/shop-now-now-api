@@ -100,25 +100,6 @@ export class UserAuthController {
   }
 
   /**
-   * Sends a verification email for user pre-registration.
-   *
-   * @param {EmailDto} request - DTO containing the email address.
-   * @returns {Promise<{ status: boolean, message: string }>} Status and message.
-   */
-  @ApiCreatedResponse({ type: ApiResponseDto })
-  @HttpCode(201)
-  @Post('pre-register')
-  async preRegister(
-    @Body() request: EmailDto,
-  ): Promise<{ status: boolean; message: string }> {
-    await this.userService.createTempUser(request);
-    return {
-      status: true,
-      message: 'Email verification successfully sent to ' + request.email,
-    };
-  }
-
-  /**
    * Handles the user logout process.
    *
    * @param res - The response object used to clear cookies.
@@ -150,7 +131,7 @@ export class UserAuthController {
   async verify(
     @Body() request: VerifyDto,
   ): Promise<{ status: boolean; message: string }> {
-    await this.userService.verifyTempUser(request);
+    await this.userService.verifyUserEmail(request);
     return {
       status: true,
       message: 'User successfully verified',
@@ -169,7 +150,8 @@ export class UserAuthController {
   async sendEmailVerification(
     @Body() request: EmailDto,
   ): Promise<{ status: boolean; message: string }> {
-    await this.userService.createTempUser(request);
+    const user = await this.userService.findOneByEmail(request.email);
+    await this.userService.sendVerificationMail(request.email, user.code);
     return {
       status: true,
       message: 'Email verification successfully sent to ' + request.email,

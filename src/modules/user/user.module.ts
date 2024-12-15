@@ -7,10 +7,9 @@ import { CreateUserTransaction } from 'src/utilities/transactions/create-user-tr
 import { UserController } from './user.controller';
 import { SessionService } from '../auth/session/session.service';
 import { Ssions } from '../auth/entities/ssions.entity';
-import { TempUser } from './entities/temp-user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Ssions, TempUser]), SharedModule],
+  imports: [TypeOrmModule.forFeature([User, Ssions]), SharedModule],
   providers: [UserService, CreateUserTransaction, SessionService],
   exports: [UserService],
   controllers: [UserController],

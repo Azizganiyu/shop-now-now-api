@@ -74,7 +74,7 @@ export class Product {
   @ApiProperty()
   presentationId?: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'longtext', nullable: true })
   @ApiProperty()
   image?: string;
 

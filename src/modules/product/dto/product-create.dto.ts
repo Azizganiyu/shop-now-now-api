@@ -19,15 +19,32 @@ class Descriptors {
   description?: string;
 }
 
-export class CreateProductCategory extends Descriptors {}
-export class CreateProductSubCategory extends Descriptors {}
+class ProductCategoryDescriptor extends Descriptors {
+  @ApiPropertyOptional()
+  @IsOptional()
+  imageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  iconUrl?: string;
+}
+
+class ProductSubCategoryDescriptor extends Descriptors {
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  categoryId: string;
+}
+
+export class CreateProductCategory extends ProductCategoryDescriptor {}
+export class CreateProductSubCategory extends ProductSubCategoryDescriptor {}
 export class CreateProductPresentation extends Descriptors {}
 export class CreateProductManufacturer extends Descriptors {}
 export class CreateProductPackUnit extends Descriptors {}
 export class CreateProductStrengthUnit extends Descriptors {}
 
-export class UpdateProductCategory extends Descriptors {}
-export class UpdateProductSubCategory extends Descriptors {}
+export class UpdateProductCategory extends ProductCategoryDescriptor {}
+export class UpdateProductSubCategory extends ProductSubCategoryDescriptor {}
 export class UpdateProductPresentation extends Descriptors {}
 export class UpdateProductManufacturer extends Descriptors {}
 export class UpdateProductPackUnit extends Descriptors {}
