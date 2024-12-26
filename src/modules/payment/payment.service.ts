@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   InitializePaymentDto,
   PaymentProviders,
@@ -17,12 +21,20 @@ import {
   VerifyPaymentDataResponse,
 } from './responses/payment-response';
 import { HelperService } from 'src/utilities/helper.service';
+import { PaymentRequest } from './entities/payment-request.entity';
+import { PaymentStatus } from '../cart/dto/checkout.dto';
+import { OrderShipment } from '../order/entities/order-shipment.entity';
+import { ShipmentStatus } from '../order/dto/order.dto';
 
 @Injectable()
 export class PaymentService {
   constructor(
+    @InjectRepository(OrderShipment)
+    private readonly shipmentRepository: Repository<OrderShipment>,
     @InjectRepository(PaymentAuth)
     private readonly paymentAuthRepository: Repository<PaymentAuth>,
+    @InjectRepository(PaymentRequest)
+    private readonly paymentRequestRepository: Repository<PaymentRequest>,
     private configService: ConfigService,
     private httpService: HttpService,
     private activityService: ActivityService,
@@ -33,6 +45,7 @@ export class PaymentService {
     request: InitializePaymentDto,
     user: User,
   ): Promise<InitializePaymentDataResponse> {
+    console.log('initializing payment', request.paymentProvider);
     switch (request.paymentProvider) {
       case PaymentProviders.PAYSTACK:
         return await this.initializePaystackPayment(request, user);
@@ -59,13 +72,17 @@ export class PaymentService {
         ),
       );
       console.log(response.data.data);
-      return {
+      const payment = this.paymentRequestRepository.create({
         code: response.data.data.access_code,
         url: response.data.data.authorization_url,
         reference: response.data.data.reference,
         email: user.email,
-        amount,
-      };
+        amount: request.amount,
+        userId: user?.id,
+        entity: request.entity,
+        entityReference: request.entityReference,
+      });
+      return await this.paymentRequestRepository.save(payment);
     } catch (error) {
       this.activityService.log(error, 'PAYSTACK INITIALIZE PAYMENT');
       throw new BadRequestException(
@@ -181,5 +198,43 @@ export class PaymentService {
       ),
     });
     return await this.paymentAuthRepository.save(createChargeAuth);
+  }
+
+  async findPaymentRequestByReference(reference: string) {
+    return await this.paymentRequestRepository.findOneBy({ reference });
+  }
+
+  async updatePaymentRequestStatus(id: string, status: PaymentStatus) {
+    return await this.paymentRequestRepository.update(id, { status });
+  }
+
+  async markShipmentAsPaid(
+    paymentRef: string,
+    amountPaid: number,
+    shipmentRef: string,
+  ) {
+    console.log(shipmentRef);
+    const shipment = await this.shipmentRepository.findOne({
+      where: { reference: shipmentRef },
+    });
+    if (!shipment) {
+      this.activityService.log('shipment not found');
+      throw new NotFoundException(`shipment with ref ${shipmentRef} not found`);
+    }
+    await this.shipmentRepository.update(shipment.id, {
+      amountPaid,
+      paymentRef,
+      paid: true,
+      status: ShipmentStatus.processing,
+    });
+  }
+
+  async findOne(id: string) {
+    try {
+      return await this, this.paymentRequestRepository.findOneByOrFail({ id });
+    } catch (error) {
+      console.log('error');
+      throw new NotFoundException('payment not found');
+    }
   }
 }

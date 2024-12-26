@@ -22,9 +22,12 @@ export class OrderService {
 
   async findOne(id: string) {
     try {
-      return await this.orderRepository.findOneByOrFail({ id });
+      return await this.orderRepository.findOneOrFail({
+        where: [{ id }, { reference: id }],
+        relations: ['shipments', 'items'],
+      });
     } catch (error) {
-      throw new NotFoundException('no shipment with specified ID found');
+      throw new NotFoundException('no order with specified ID found');
     }
   }
 
@@ -32,6 +35,9 @@ export class OrderService {
     const orders = this.orderRepository
       .createQueryBuilder('order')
       .leftJoinAndSelect('order.items', 'items')
+      .leftJoinAndSelect('items.product', 'product')
+      .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('order.shipments', 'shipments')
       .leftJoinAndSelect('order.user', 'user')
       .andWhere(filter.userId ? `order.userId = :userId` : '1=1', {
         userId: filter.userId,

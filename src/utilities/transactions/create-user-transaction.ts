@@ -8,6 +8,7 @@ import { Activity } from 'src/modules/activity/entities/activity.entity';
 import { CreateUserDto } from 'src/modules/auth/dto/create-user.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { UserRole } from 'src/modules/user/dto/user.dto';
+import { Wallet } from 'src/modules/wallet/entities/wallet.entity';
 
 @Injectable()
 export class CreateUserTransaction extends BaseTransaction<
@@ -64,6 +65,13 @@ export class CreateUserTransaction extends BaseTransaction<
 
     // Save the user entity to the database
     const createdUser = await manager.save(User, user);
+
+    if (createdUser.roleId === UserRole.user) {
+      await manager.save(Wallet, {
+        userId: createdUser.id,
+        currencyCode: 'NGN',
+      });
+    }
 
     // Create activity record for signup event
     const activity: Activity = {

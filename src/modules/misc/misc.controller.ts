@@ -33,6 +33,11 @@ import { CityResponseDto } from './responses/city-response.dto';
 import { UploadResponseDto } from './responses/upload-response.dto';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
+import { User } from '../user/entities/user.entity';
+import { Repository } from 'typeorm';
+import { Wallet } from '../wallet/entities/wallet.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserRole } from '../user/dto/user.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Others')
@@ -41,6 +46,8 @@ export class MiscController {
   constructor(
     private helperService: HelperService,
     private configService: ConfigService,
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
   ) {}
 
   /**
@@ -158,6 +165,25 @@ export class MiscController {
       status: true,
       message: 'file uploaded successfully',
       data: { url },
+    };
+  }
+
+  @Get('set-wallet')
+  async setWallet() {
+    const users = await this.userRepository.findBy({ roleId: UserRole.user });
+    for (const user of users) {
+      const wallet = await this.walletRepository.findOneBy({ userId: user.id });
+      if (!wallet) {
+        const create = await this.walletRepository.create({
+          currencyCode: 'NGN',
+          userId: user.id,
+        });
+        await this.walletRepository.save(create);
+      }
+    }
+    return {
+      status: true,
+      message: 'success',
     };
   }
 }

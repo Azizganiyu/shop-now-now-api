@@ -26,6 +26,10 @@ export class AddressService {
   }
 
   async create(address: CreateAddress, userId: string) {
+    const exist = await this.addressRepository.findOneBy({ userId });
+    if (exist) {
+      return await this.update(exist.id, address);
+    }
     const create = await this.addressRepository.create({
       userId,
       ...address,

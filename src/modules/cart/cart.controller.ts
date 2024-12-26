@@ -78,6 +78,17 @@ export class CartController {
 
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
+  @Delete()
+  async deleteCart(@Userx() user: User) {
+    await this.cartService.deleteCart(user.id);
+    return {
+      status: true,
+      message: 'cart deleted',
+    };
+  }
+
+  @ApiOkResponse({ type: ApiResponseDto })
+  @HttpCode(200)
   @ApiParam({ name: 'id', description: 'Cart ID' })
   @Delete(':id')
   async remove(@Param('id') id: string) {
@@ -92,11 +103,47 @@ export class CartController {
   @HttpCode(200)
   @Post('checkout')
   async checkout(@Userx() user: User, @Body() request: CartCheckout) {
-    const data = await this.cartService.checkout(request, user.id);
+    const data = await this.cartService.checkout(request, user);
     return {
       status: true,
       message: 'checkout completed',
       data,
+    };
+  }
+
+  @ApiOkResponse({ type: ApiResponseDto })
+  @HttpCode(200)
+  @Post('wishlist')
+  async saveWish(@Userx() user: User) {
+    const data = await this.cartService.saveWishList(user);
+    return {
+      status: true,
+      message: 'list saved successfully',
+      data,
+    };
+  }
+
+  @ApiOkResponse({ type: ApiResponseDto })
+  @HttpCode(200)
+  @Get('wishlist')
+  async getWish(@Userx() user: User) {
+    const data = await this.cartService.getWishList(user);
+    return {
+      status: true,
+      message: 'list retreived successfully',
+      data,
+    };
+  }
+
+  @ApiOkResponse({ type: ApiResponseDto })
+  @HttpCode(200)
+  @ApiParam({ name: 'id' })
+  @Delete('wishlist/:id')
+  async removeWish(@Param('id') id: string) {
+    await this.cartService.deleteWishList(id);
+    return {
+      status: true,
+      message: 'wishlist deleted successfully',
     };
   }
 }

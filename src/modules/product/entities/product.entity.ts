@@ -60,7 +60,9 @@ export class Product {
   @ApiProperty()
   categoryId?: string;
 
-  @ManyToOne(() => ProductCategory, (category) => category.products)
+  @ManyToOne(() => ProductCategory, (category) => category.products, {
+    eager: true,
+  })
   category?: ProductCategory;
 
   @Column({ nullable: true })

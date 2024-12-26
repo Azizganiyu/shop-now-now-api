@@ -39,6 +39,9 @@ import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
 import { MedicationRequestModule } from './modules/medication-request/medication-request.module';
 import { HealthCalculatorModule } from './modules/health-calculator/health-calculator.module';
+import { WalletModule } from './modules/wallet/wallet.module';
+import { TransactionModule } from './modules/transaction/transaction.module';
+import { SpecialRequestModule } from './modules/special-request/special-request.module';
 
 @Module({
   imports: [
@@ -88,6 +91,9 @@ import { HealthCalculatorModule } from './modules/health-calculator/health-calcu
     ReviewModule,
     MedicationRequestModule,
     HealthCalculatorModule,
+    WalletModule,
+    TransactionModule,
+    SpecialRequestModule,
   ],
   controllers: [AppController],
   providers: [

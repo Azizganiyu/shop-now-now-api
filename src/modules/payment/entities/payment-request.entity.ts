@@ -5,56 +5,59 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
-import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
-import { Exclude } from 'class-transformer';
+import { PaymentStatus } from 'src/modules/cart/dto/checkout.dto';
 
 @Entity()
-export class Address {
+export class PaymentRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @ApiProperty()
-  @Column({ length: 199 })
-  firstName: string;
-
-  @ApiProperty()
-  @Column({ length: 199 })
-  lastName: string;
-
-  @ApiProperty()
-  @Column({ length: 199 })
-  email: string;
-
-  @ApiProperty()
-  @Column({ length: 199 })
-  phone: string;
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    default: 0,
+  })
+  amount: number;
 
   @Column()
-  @ApiProperty()
-  userId: string;
+  @ApiProperty({ nullable: true })
+  userId?: string;
 
-  @ManyToOne(() => User, (user) => user.addresses)
+  @ManyToOne(() => User, (user) => user.carts)
   user?: User;
 
   @Column()
   @ApiProperty()
-  state: string;
+  email: string;
 
   @Column()
   @ApiProperty()
-  city: string;
+  reference: string;
 
   @Column()
   @ApiProperty()
-  address: string;
+  code: string;
 
-  @OneToMany(() => OrderShipment, (item) => item.address)
-  @Exclude()
-  shipments?: OrderShipment[];
+  @Column()
+  @ApiProperty()
+  url: string;
+
+  @Column()
+  @ApiProperty()
+  entity: string;
+
+  @Column()
+  @ApiProperty()
+  entityReference: string;
+
+  @Column({ default: PaymentStatus.pending, nullable: true })
+  @ApiProperty()
+  status?: string;
 
   @CreateDateColumn()
   @ApiProperty()

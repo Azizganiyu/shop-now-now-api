@@ -7,7 +7,6 @@ import {
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { OrderShipment } from './entities/order-shipment.entity';
-import { AddressDataResponse } from '../address/address-responses';
 
 class OrderDataResponse extends Order {
   @ApiProperty({ type: OrderItem, isArray: true })
@@ -35,9 +34,6 @@ export class OrderResponseAll extends ApiResponseDto {
 class ShipmentDataResponse extends OrderShipment {
   @ApiProperty({ type: OrderDataResponse })
   order: OrderDataResponse;
-
-  @ApiProperty({ type: AddressDataResponse })
-  address: AddressDataResponse;
 
   @ApiProperty({ type: UserResponseDto })
   user: UserResponseDto;

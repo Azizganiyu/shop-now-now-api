@@ -31,6 +31,7 @@ import { ReasonDto } from './dto/reason.dto';
 import { GetUserResponseDto } from './responses/user-response.dto';
 import { ApiResponseDto } from '../misc/responses/api-response.dto';
 import { UserFindResponseDto } from './responses/find-user-response.dto';
+import { UpdateUserDto } from '../auth/dto/create-user.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user', 'admin')
@@ -183,6 +184,22 @@ export class UserController {
     return {
       status: true,
       message: 'Account successfully deleted',
+    };
+  }
+
+  @ApiOkResponse({ status: 200, type: ApiResponseDto })
+  @Roles('*')
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'user ID' })
+  @Patch(':id/update')
+  async update(@Param() param: IdDto, @Body() request: UpdateUserDto) {
+    // Suspend a user based on the provided user ID and reason
+    await this.userService.update(param.id, request);
+
+    // Return a response with status and a success message
+    return {
+      status: true,
+      message: 'User successfully updated',
     };
   }
 }

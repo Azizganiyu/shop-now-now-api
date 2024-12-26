@@ -9,9 +9,10 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
-import { OrderStatus, OrderTypes } from '../dto/order.dto';
+import { OrderStatus } from '../dto/order.dto';
 import { OrderItem } from './order-item.entity';
 import { OrderShipment } from './order-shipment.entity';
+import { PaymentType } from 'src/modules/cart/dto/checkout.dto';
 
 @Entity()
 export class Order {
@@ -20,30 +21,22 @@ export class Order {
 
   @Column()
   @ApiProperty()
+  reference: string;
+
+  @Column()
+  @ApiProperty()
   userId: string;
 
   @ManyToOne(() => User, (user) => user.carts)
   user?: User;
 
-  @Column({ nullable: true, default: OrderTypes.onetime })
+  @Column({ nullable: true, default: PaymentType.CARD })
   @ApiProperty()
-  type?: string;
+  paymentType?: string;
 
   @Column({ nullable: true, default: OrderStatus.pending })
   @ApiProperty()
   status?: string;
-
-  @ApiProperty()
-  @Column({ nullable: true })
-  duration?: number;
-
-  @ApiProperty()
-  @Column({ nullable: true })
-  durationType?: string;
-
-  @Column({ nullable: true })
-  @ApiProperty()
-  nextShipmentDate?: Date;
 
   @OneToMany(() => OrderItem, (item) => item.order, { eager: true })
   items?: OrderItem[];

@@ -1,22 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ApiResponseDto } from 'src/modules/misc/responses/api-response.dto';
+import { PaymentRequest } from '../entities/payment-request.entity';
 
-export class InitializePaymentDataResponse {
-  @ApiProperty()
-  code: string | null;
-
-  @ApiProperty()
-  url: string | null;
-
-  @ApiProperty()
-  reference: string | null;
-
-  @ApiProperty()
-  email: string;
-
-  @ApiProperty()
-  amount: string;
-}
+export class InitializePaymentDataResponse extends PaymentRequest {}
 
 export class InitializePaymentResponse extends ApiResponseDto {
   @ApiProperty({ type: InitializePaymentDataResponse })

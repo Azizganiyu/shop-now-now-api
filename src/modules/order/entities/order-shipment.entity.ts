@@ -9,19 +9,79 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Order } from './order.entity';
 import { ShipmentStatus } from '../dto/order.dto';
-import { Address } from 'src/modules/address/entities/address.entity';
 
 @Entity()
 export class OrderShipment {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @ApiProperty()
+  @Column({ length: 199 })
+  firstName: string;
+
+  @ApiProperty()
+  @Column({ length: 199 })
+  lastName: string;
+
+  @ApiProperty()
+  @Column({ length: 199 })
+  email: string;
+
+  @ApiProperty()
+  @Column({ length: 199 })
+  phone: string;
+
   @Column()
   @ApiProperty()
-  addressId: string;
+  state: string;
 
-  @ManyToOne(() => Address, (adress) => adress.shipments, { eager: true })
-  address?: Address;
+  @Column()
+  @ApiProperty()
+  city: string;
+
+  @Column()
+  @ApiProperty()
+  address: string;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  amount: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  deliveryFee: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  tax: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  amountToPay: number;
 
   @ApiProperty()
   @Column({
@@ -42,7 +102,7 @@ export class OrderShipment {
 
   @Column()
   @ApiProperty()
-  orderRef: string;
+  reference: string;
 
   @Column({ nullable: true })
   @ApiProperty()
@@ -55,10 +115,6 @@ export class OrderShipment {
   @Column({ nullable: true, default: false })
   @ApiProperty()
   paid?: boolean;
-
-  @Column()
-  @ApiProperty()
-  duration: number;
 
   @Column()
   @ApiProperty()

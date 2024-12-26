@@ -1,43 +1,75 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined, IsEnum, IsNotEmpty, ValidateIf } from 'class-validator';
-import { OrderTypes } from 'src/modules/order/dto/order.dto';
+import {
+  IsDefined,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsPositive,
+  ValidateIf,
+} from 'class-validator';
 
-export enum DurationType {
-  DAY = 'DAY',
-  MONTH = 'MONTH',
-  YEAR = 'YEAR',
+export enum PaymentType {
+  WALLET = 'WALLET',
+  CARD = 'CARD',
+}
+
+export enum PaymentEntity {
+  WALLET = 'WALLET',
+  SHIPMENT = 'SHIPMENT',
+}
+
+export enum PaymentStatus {
+  success = 'success',
+  pending = 'pending',
+  failed = 'failed',
 }
 
 export class CartCheckout {
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  paymentRef: string;
+  // @ApiProperty()
+  // @IsDefined()
+  // @IsNotEmpty()
+  // paymentRef: string;
+
+  // @ApiProperty()
+  // @IsDefined()
+  // @IsNotEmpty()
+  // addressId: string;
 
   @ApiProperty()
+  @IsPositive()
+  @IsNumber()
   @IsDefined()
   @IsNotEmpty()
-  addressId: string;
+  amount: number;
 
-  @ApiProperty({ enum: OrderTypes, default: OrderTypes.onetime })
+  @ApiProperty()
+  @IsPositive()
+  @IsNumber()
   @IsDefined()
   @IsNotEmpty()
-  @IsEnum(OrderTypes)
-  orderType: OrderTypes = OrderTypes.onetime;
+  amountToPay: number;
+
+  @ApiProperty()
+  @IsPositive()
+  @IsNumber()
+  @IsDefined()
+  @IsNotEmpty()
+  deliveryFee: number;
+
+  @ApiProperty()
+  @IsPositive()
+  @IsNumber()
+  @IsDefined()
+  @IsNotEmpty()
+  tax: number;
 
   @ApiProperty({
-    enum: DurationType,
-    default: DurationType.DAY,
+    enum: PaymentType,
+    default: PaymentType.CARD,
   })
   @IsDefined()
   @IsNotEmpty()
   @ValidateIf((o) => o.duration)
-  @IsEnum(DurationType)
-  durationType?: DurationType;
-
-  @ApiProperty()
-  @ValidateIf((o) => o.durationType)
-  @IsDefined()
-  @IsNotEmpty()
-  duration?: number;
+  @IsEnum(PaymentType)
+  paymentType?: PaymentType;
 }

@@ -4,6 +4,7 @@ import {
   IsEmail,
   IsNotEmpty,
   IsOptional,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -14,14 +15,14 @@ export class CreateUserDto {
   @ApiProperty()
   @MaxLength(199)
   @MinLength(3)
-  firstName?: string;
+  firstName: string;
 
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
   @MaxLength(199)
   @MinLength(3)
-  lastName?: string;
+  lastName: string;
 
   @IsOptional()
   @ApiPropertyOptional()
@@ -31,7 +32,7 @@ export class CreateUserDto {
   @IsOptional()
   @ApiPropertyOptional({ default: 'user' })
   @MaxLength(199)
-  roleId?: string = 'user';
+  roleId: string = 'user';
 
   @IsDefined()
   @ApiProperty()
@@ -42,6 +43,10 @@ export class CreateUserDto {
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
+  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+    message:
+      'Password must contain at least one uppercase letter, one number, one special character, and be at least 8 characters long',
+  })
   password: string;
 }
 

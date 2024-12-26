@@ -20,6 +20,7 @@ export class MailService {
         template: './mail_template',
         attachments: data.attachments ?? null,
         context: {
+          subject: data.subject,
           name: data.fullName,
           message: data.message,
           url: data.url,

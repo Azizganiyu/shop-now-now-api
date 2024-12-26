@@ -29,12 +29,12 @@ export class Cart {
 
   @ApiProperty()
   @Expose()
-  @Transform(({ obj }) => obj.product.sellingPrice)
+  @Transform(({ obj }) => obj.product?.sellingPrice)
   unitAmount: number;
 
   @ApiProperty()
   @Expose()
-  @Transform(({ obj }) => obj.product.sellingPrice * obj.quantity)
+  @Transform(({ obj }) => obj.product?.sellingPrice * obj.quantity)
   totalAmount: number;
 
   @ManyToOne(() => User, (user) => user.carts)

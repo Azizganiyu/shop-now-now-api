@@ -5,6 +5,26 @@ export class CreateAddress {
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
+  firstName: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  lastName: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  email: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  phone: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
   address: string;
 
   @ApiProperty()
@@ -16,11 +36,6 @@ export class CreateAddress {
   @IsDefined()
   @IsNotEmpty()
   state: string;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  country: string;
 }
 
 export class UpdateAddress extends CreateAddress {}

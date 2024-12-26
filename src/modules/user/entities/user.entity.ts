@@ -4,10 +4,14 @@ import { Activity } from 'src/modules/activity/entities/activity.entity';
 import { Address } from 'src/modules/address/entities/address.entity';
 import { Ssions } from 'src/modules/auth/entities/ssions.entity';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
+import { Wish } from 'src/modules/cart/entities/wish.entity';
 import { NotificationReadReceipt } from 'src/modules/notification/entities/notification-read-receipt.entity';
 import { Notification } from 'src/modules/notification/entities/notification.entity';
 import { ProductReview } from 'src/modules/review/entities/review.entity';
 import { Role } from 'src/modules/role/entities/role.entity';
+import { SpecialRequest } from 'src/modules/special-request/entities/special-request.entity';
+import { Transaction } from 'src/modules/transaction/entities/transaction.entity';
+import { Wallet } from 'src/modules/wallet/entities/wallet.entity';
 import {
   Column,
   CreateDateColumn,
@@ -25,15 +29,15 @@ export class User {
   id?: string;
 
   @ApiProperty()
-  @Column({ length: 199, nullable: true })
-  firstName?: string;
+  @Column({ length: 199 })
+  firstName: string;
 
   @ApiProperty()
-  @Column({ length: 199, nullable: true })
-  lastName?: string;
+  @Column({ length: 199 })
+  lastName: string;
 
   @ApiProperty()
-  @Column({ unique: true, length: 199, nullable: true })
+  @Column({ unique: true, length: 199 })
   username?: string;
 
   @ApiProperty()
@@ -118,6 +122,14 @@ export class User {
   @Exclude()
   carts?: Cart[];
 
+  @OneToMany(() => SpecialRequest, (request) => request.user)
+  @Exclude()
+  requests?: SpecialRequest[];
+
+  @OneToMany(() => Wish, (wish) => wish.user)
+  @Exclude()
+  wishes?: Wish[];
+
   @OneToMany(() => ProductReview, (review) => review.user)
   @Exclude()
   reviews?: ProductReview[];
@@ -129,6 +141,14 @@ export class User {
   @ApiProperty()
   @Column({ default: 'active' })
   status?: string;
+
+  @OneToMany(() => Transaction, (transaction) => transaction.user)
+  @Exclude()
+  transactions?: Transaction[];
+
+  @OneToMany(() => Wallet, (wallet) => wallet.user)
+  @Exclude()
+  wallets?: Wallet[];
 
   @ApiProperty()
   @Exclude()
