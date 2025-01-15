@@ -7,25 +7,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductCategory } from '../entities/product-category.entity';
 import { Product } from '../entities/product.entity';
-import { ProductSubCategory } from '../entities/product-sub-category.entity';
+import { HelperService } from 'src/utilities/helper.service';
 import {
   CreateProductCategory,
   UpdateProductCategory,
 } from '../dto/product-create.dto';
-import { RequestContextService } from 'src/utilities/request-context.service';
-import { RoleTag } from 'src/constants/roletag';
-import { HelperService } from 'src/utilities/helper.service';
 
 @Injectable()
 export class ProductCategoryService {
   constructor(
     @InjectRepository(ProductCategory)
     private readonly categoryRepository: Repository<ProductCategory>,
-    @InjectRepository(ProductSubCategory)
-    private readonly subCategoryRepository: Repository<ProductSubCategory>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
-    private requestContext: RequestContextService,
     private helperService: HelperService,
   ) {}
 
@@ -37,9 +31,12 @@ export class ProductCategoryService {
    *
    * @returns List of categories based on user role.
    */
-  async findAll() {
-    return this.requestContext.roleTag === RoleTag.admin
-      ? await this.categoryRepository.find()
+  async findAll(includeInactive: any) {
+    return includeInactive
+      ? await this.categoryRepository
+          .createQueryBuilder('category')
+          .loadRelationCountAndMap('category.productCount', 'category.products')
+          .getMany()
       : await this.categoryRepository.findBy({ status: true });
   }
 
@@ -128,13 +125,6 @@ export class ProductCategoryService {
     });
     if (hasProduct) {
       throw new ForbiddenException('Category has products attached');
-    }
-
-    const hasSubCategory = await this.subCategoryRepository.findOne({
-      where: { categoryId: id },
-    });
-    if (hasSubCategory) {
-      throw new ForbiddenException('Category has sub-categories');
     }
 
     return await this.categoryRepository.delete(id);

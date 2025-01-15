@@ -72,4 +72,13 @@ export class WalletService {
   async getBalance(userId: string): Promise<Wallet> {
     return await this.walletRepository.findOneBy({ userId });
   }
+
+  async convertPoints(userId: string): Promise<Wallet> {
+    const wallet = await this.walletRepository.findOneBy({ userId });
+    await this.walletRepository.update(wallet.id, {
+      points: 0,
+      balance: wallet.balance + wallet.points,
+    });
+    return wallet;
+  }
 }

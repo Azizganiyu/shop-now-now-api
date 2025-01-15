@@ -4,9 +4,11 @@ import {
   Controller,
   Get,
   HttpCode,
+  HttpStatus,
   NotFoundException,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -39,6 +41,8 @@ import {
   TransactionPurpose,
   TransactionStatus,
 } from '../transaction/dto/transaction.dto';
+import { FindPaymentDto } from './dto/find-payment.dto';
+import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
 @ApiBearerAuth('JWT-auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -51,6 +55,23 @@ export class PaymentController {
     private activityService: ActivityService,
     private transactionService: TransactionService,
   ) {}
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('*')
+  @ApiOkResponse()
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  async findAll(
+    @Query() pageOptionDto: PageOptionsDto,
+    @Query() options: FindPaymentDto,
+  ) {
+    const data = await this.paymentService.findAll(pageOptionDto, options);
+    return {
+      status: true,
+      message: 'Payments successfully retrieved',
+      data: data,
+    };
+  }
 
   @ApiOkResponse({ type: InitializePaymentResponse })
   @UseGuards(JwtAuthGuard, RolesGuard)

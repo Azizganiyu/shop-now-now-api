@@ -1,9 +1,11 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
   Param,
+  Post,
   Query,
   UseGuards,
   UseInterceptors,
@@ -24,6 +26,7 @@ import { Userx } from '../../decorator/userx.decorator';
 import { User } from '../user/entities/user.entity';
 import { NotificationResponseDto } from './responses/find-notification-response.dto';
 import { ApiResponseDto } from '../misc/responses/api-response.dto';
+import { SendMessageDto } from './dto/notification.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('*')
@@ -33,6 +36,18 @@ import { ApiResponseDto } from '../misc/responses/api-response.dto';
 @Controller('notification')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
+
+  @ApiOkResponse({ status: 200, type: NotificationResponseDto })
+  @HttpCode(200)
+  @Post()
+  async send(@Body() payload: SendMessageDto) {
+    const data = await this.notificationService.message(payload);
+    return {
+      status: true,
+      message: 'notifications successfully retrieved',
+      data: data,
+    };
+  }
 
   /**
    * Retrieve all notifications for a user.

@@ -1,4 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Optional } from '@nestjs/common';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDefined,
   IsEnum,
@@ -72,4 +73,36 @@ export class CartCheckout {
   @ValidateIf((o) => o.duration)
   @IsEnum(PaymentType)
   paymentType?: PaymentType;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsDefined()
+  @IsNotEmpty()
+  discount: number;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsDefined()
+  @IsNotEmpty()
+  discountValue: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  discountType: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  discountValueType: string;
+
+  @ApiPropertyOptional()
+  @Optional()
+  couponCode: string;
+
+  @ApiProperty()
+  @IsNumber()
+  @IsDefined()
+  @IsNotEmpty()
+  pointToCredit: number;
 }

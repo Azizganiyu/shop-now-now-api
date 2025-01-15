@@ -139,7 +139,7 @@ export class TransactionService {
       .andWhere(
         filter.search
           ? new Brackets((qb) => {
-              qb.where('transaction.reference ilike :reference', {
+              qb.where('transaction.reference like :reference', {
                 reference: '%' + filter.search + '%',
               });
             })
@@ -184,7 +184,7 @@ export class TransactionService {
       .andWhere(
         filter.search
           ? new Brackets((qb) => {
-              qb.where('transaction.reference ilike :reference', {
+              qb.where('transaction.reference like :reference', {
                 reference: '%' + filter.search + '%',
               });
             })

@@ -24,7 +24,7 @@ export class OrderService {
     try {
       return await this.orderRepository.findOneOrFail({
         where: [{ id }, { reference: id }],
-        relations: ['shipments', 'items'],
+        relations: ['shipments', 'shipments.location', 'items'],
       });
     } catch (error) {
       throw new NotFoundException('no order with specified ID found');

@@ -32,7 +32,10 @@ export class SecurityService {
       request.oldPassword,
     );
     const password = await bcrypt.hash(request.newPassword, 10);
-    return await this.userRepository.update(user.id, { password });
+    return await this.userRepository.update(user.id, {
+      password,
+      changedPassword: true,
+    });
   }
 
   /**

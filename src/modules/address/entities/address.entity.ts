@@ -11,6 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
 import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
 import { Exclude } from 'class-transformer';
+import { Location } from 'src/modules/location/entities/location.entity';
 
 @Entity()
 export class Address {
@@ -42,11 +43,10 @@ export class Address {
 
   @Column()
   @ApiProperty()
-  state: string;
+  locationId: string;
 
-  @Column()
-  @ApiProperty()
-  city: string;
+  @ManyToOne(() => Location, (location) => location.addresses)
+  location?: Location;
 
   @Column()
   @ApiProperty()

@@ -27,11 +27,10 @@ import { EmailDto } from '../auth/dto/email-verify.dto';
 import { FindUserDto } from './dto/find-user.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { IdDto } from '../misc/dto/id-dto.dto';
-import { ReasonDto } from './dto/reason.dto';
 import { GetUserResponseDto } from './responses/user-response.dto';
 import { ApiResponseDto } from '../misc/responses/api-response.dto';
 import { UserFindResponseDto } from './responses/find-user-response.dto';
-import { UpdateUserDto } from '../auth/dto/create-user.dto';
+import { UpdateAvatarDto, UpdateUserDto } from '../auth/dto/create-user.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user', 'admin')
@@ -103,6 +102,18 @@ export class UserController {
     };
   }
 
+  @ApiOkResponse({ status: 200, type: UserFindResponseDto })
+  @HttpCode(200)
+  @Get('summary')
+  async summary() {
+    const data = await this.userService.summary();
+    return {
+      status: true,
+      message: 'Users summary retrieved',
+      data: data,
+    };
+  }
+
   /**
    * Retrieves a specific user based on the provided user ID.
    * @param param Object containing the user ID from the route parameter.
@@ -134,10 +145,10 @@ export class UserController {
   @Roles('admin')
   @HttpCode(200)
   @ApiParam({ name: 'id', description: 'user ID' })
-  @Patch(':id/suspend')
-  async suspend(@Param() param: IdDto, @Body() request: ReasonDto) {
+  @Patch('suspend/:id')
+  async suspend(@Param() param: IdDto) {
     // Suspend a user based on the provided user ID and reason
-    await this.userService.suspend(param.id, request.reason);
+    await this.userService.suspend(param.id);
 
     // Return a response with status and a success message
     return {
@@ -156,10 +167,10 @@ export class UserController {
   @HttpCode(200)
   @Roles('admin')
   @ApiParam({ name: 'id', description: 'user ID' })
-  @Patch(':id/unsuspend')
-  async unsuspend(@Param() param: IdDto, @Body() request: ReasonDto) {
+  @Patch('unsuspend/:id')
+  async unsuspend(@Param() param: IdDto) {
     // Unsuspend a user based on the provided user ID and reason
-    await this.userService.unsuspend(param.id, request.reason);
+    await this.userService.unsuspend(param.id);
 
     // Return a response with status and a success message
     return {
@@ -177,7 +188,7 @@ export class UserController {
   @HttpCode(200)
   @Roles('admin')
   @ApiParam({ name: 'id', description: 'user ID' })
-  @Delete(':id/delete')
+  @Delete('delete/:id')
   async delete(@Param() param: IdDto) {
     const user = await this.userService.findOne(param.id);
     await this.userService.deleteAccount(user, user.email);
@@ -193,13 +204,23 @@ export class UserController {
   @ApiParam({ name: 'id', description: 'user ID' })
   @Patch(':id/update')
   async update(@Param() param: IdDto, @Body() request: UpdateUserDto) {
-    // Suspend a user based on the provided user ID and reason
     await this.userService.update(param.id, request);
-
-    // Return a response with status and a success message
     return {
       status: true,
       message: 'User successfully updated',
+    };
+  }
+
+  @ApiOkResponse({ status: 200, type: ApiResponseDto })
+  @Roles('*')
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'user ID' })
+  @Patch(':id/photo')
+  async updateAvatar(@Param() param: IdDto, @Body() request: UpdateAvatarDto) {
+    await this.userService.update(param.id, request);
+    return {
+      status: true,
+      message: 'profile photo successfully updated',
     };
   }
 }

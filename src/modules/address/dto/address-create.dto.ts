@@ -30,12 +30,7 @@ export class CreateAddress {
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
-  city: string;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  state: string;
+  locationId: string;
 }
 
 export class UpdateAddress extends CreateAddress {}

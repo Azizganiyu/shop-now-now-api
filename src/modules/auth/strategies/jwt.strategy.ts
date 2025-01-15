@@ -52,9 +52,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    */
   async validate(payload: any): Promise<any> {
     const user: User = await this.userService.findOne(payload.user);
-    if (user.isDeleted) {
-      throw new UnauthorizedException('user does not exist');
-    }
 
     //check suspended
     if (user.status == 'suspended') {

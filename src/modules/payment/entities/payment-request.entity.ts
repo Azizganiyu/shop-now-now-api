@@ -24,11 +24,11 @@ export class PaymentRequest {
   })
   amount: number;
 
-  @Column()
-  @ApiProperty({ nullable: true })
+  @Column({ nullable: true })
+  @ApiProperty()
   userId?: string;
 
-  @ManyToOne(() => User, (user) => user.carts)
+  @ManyToOne(() => User, (user) => user.paymentRequests)
   user?: User;
 
   @Column()

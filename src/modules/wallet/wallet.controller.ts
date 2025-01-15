@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpCode,
+  Post,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -28,6 +29,18 @@ export class WalletController {
   @Get('balance')
   async getBalance(@Userx() user: User) {
     const data = await this.walletService.getBalance(user.id);
+    return {
+      status: true,
+      message: `wallets balance retrieved successfully`,
+      data,
+    };
+  }
+
+  @ApiOkResponse({ status: 200 })
+  @HttpCode(200)
+  @Post('convert-points')
+  async convertPoints(@Userx() user: User) {
+    const data = await this.walletService.convertPoints(user.id);
     return {
       status: true,
       message: `wallets balance retrieved successfully`,

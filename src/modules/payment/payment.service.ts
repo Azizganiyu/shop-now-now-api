@@ -11,7 +11,7 @@ import {
 import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaymentAuth } from './entities/payment-auth.entity';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
@@ -25,12 +25,22 @@ import { PaymentRequest } from './entities/payment-request.entity';
 import { PaymentStatus } from '../cart/dto/checkout.dto';
 import { OrderShipment } from '../order/entities/order-shipment.entity';
 import { ShipmentStatus } from '../order/dto/order.dto';
+import { Wallet } from '../wallet/entities/wallet.entity';
+import { PageOptionsDto } from 'src/utilities/pagination/dtos';
+import { PageDto } from 'src/utilities/pagination/page.dto';
+import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
+import { FindPaymentDto } from './dto/find-payment.dto';
+import { Product } from '../product/entities/product.entity';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectRepository(OrderShipment)
     private readonly shipmentRepository: Repository<OrderShipment>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    @InjectRepository(Wallet)
+    private readonly walletRepository: Repository<Wallet>,
     @InjectRepository(PaymentAuth)
     private readonly paymentAuthRepository: Repository<PaymentAuth>,
     @InjectRepository(PaymentRequest)
@@ -216,6 +226,7 @@ export class PaymentService {
     console.log(shipmentRef);
     const shipment = await this.shipmentRepository.findOne({
       where: { reference: shipmentRef },
+      relations: ['order', 'order.items'],
     });
     if (!shipment) {
       this.activityService.log('shipment not found');
@@ -227,6 +238,25 @@ export class PaymentService {
       paid: true,
       status: ShipmentStatus.processing,
     });
+    if (shipment.pointToCredit) {
+      const wallet = await this.walletRepository.findOneBy({
+        userId: shipment.order.userId,
+      });
+      if (wallet) {
+        this.walletRepository.update(wallet.id, {
+          points: wallet.points + shipment.pointToCredit,
+        });
+      }
+    }
+    for (const item of shipment.order.items) {
+      const product = await this.productRepository.findOneBy({
+        id: item.productId,
+      });
+      const newStock = product.stock - item.quantity;
+      await this.productRepository.update(product.id, {
+        stock: newStock < 0 ? 0 : newStock,
+      });
+    }
   }
 
   async findOne(id: string) {
@@ -236,5 +266,50 @@ export class PaymentService {
       console.log('error');
       throw new NotFoundException('payment not found');
     }
+  }
+
+  async findAll(
+    pageOptionsDto: PageOptionsDto,
+    filter: FindPaymentDto,
+  ): Promise<PageDto<PaymentRequest>> {
+    const payments = this.paymentRequestRepository
+      .createQueryBuilder('payment')
+      .leftJoinAndSelect('payment.user', 'user')
+      .andWhere('payment.status = :status', {
+        status: PaymentStatus.success,
+      })
+      .andWhere(filter.from ? `payment.createdAt >= :fromDate` : '1=1', {
+        fromDate: filter.from,
+      })
+      .andWhere(filter.to ? `payment.createdAt <= :toDate` : '1=1', {
+        toDate: filter.to,
+      })
+      .andWhere(
+        filter.search
+          ? new Brackets((qb) => {
+              qb.where('payment.reference like :reference', {
+                reference: '%' + filter.search + '%',
+              })
+                .orWhere('user.firstName like :firstName', {
+                  firstName: '%' + filter.search + '%',
+                })
+                .orWhere('user.lastName like :lastName', {
+                  lastName: '%' + filter.search + '%',
+                })
+                .orWhere('user.email like :email', {
+                  email: '%' + filter.search + '%',
+                });
+            })
+          : '1=1',
+      )
+      .orderBy('payment.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
+
+    const itemCount = await payments.getCount();
+    const { entities } = await payments.getRawAndEntities();
+
+    const pageMetaDto = new PageMetaDto({ itemCount, pageOptionsDto });
+    return new PageDto(entities, pageMetaDto);
   }
 }

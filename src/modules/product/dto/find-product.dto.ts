@@ -5,6 +5,10 @@ import { IsOptional } from 'class-validator';
 export class FindProductDto {
   @ApiPropertyOptional()
   @IsOptional()
+  admin?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   categoryId?: string;
 
   @ApiPropertyOptional()

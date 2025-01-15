@@ -7,6 +7,7 @@ import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { Wish } from 'src/modules/cart/entities/wish.entity';
 import { NotificationReadReceipt } from 'src/modules/notification/entities/notification-read-receipt.entity';
 import { Notification } from 'src/modules/notification/entities/notification.entity';
+import { PaymentRequest } from 'src/modules/payment/entities/payment-request.entity';
 import { ProductReview } from 'src/modules/review/entities/review.entity';
 import { Role } from 'src/modules/role/entities/role.entity';
 import { SpecialRequest } from 'src/modules/special-request/entities/special-request.entity';
@@ -15,6 +16,7 @@ import { Wallet } from 'src/modules/wallet/entities/wallet.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   ManyToOne,
   OneToMany,
@@ -122,6 +124,9 @@ export class User {
   @Exclude()
   carts?: Cart[];
 
+  @OneToMany(() => PaymentRequest, (payment) => payment.user)
+  paymentRequests?: PaymentRequest[];
+
   @OneToMany(() => SpecialRequest, (request) => request.user)
   @Exclude()
   requests?: SpecialRequest[];
@@ -151,9 +156,12 @@ export class User {
   wallets?: Wallet[];
 
   @ApiProperty()
+  @Column({ default: false })
+  changedPassword?: boolean;
+
+  @DeleteDateColumn()
   @Exclude()
-  @Column({ nullable: true, default: false })
-  isDeleted?: boolean;
+  deletedAt?: Date;
 
   @CreateDateColumn()
   @ApiProperty()

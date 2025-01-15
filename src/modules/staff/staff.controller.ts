@@ -28,6 +28,8 @@ import { UserFindResponseDto } from '../user/responses/find-user-response.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { FindUserDto } from '../user/dto/find-user.dto';
 import { RoleTag } from 'src/constants/roletag';
+import { UserRole } from '../user/dto/user.dto';
+import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
@@ -36,15 +38,22 @@ import { RoleTag } from 'src/constants/roletag';
 @ApiTags('Staff')
 @Controller('staff')
 export class StaffController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private notificationGenerator: NotificationGeneratorService,
+  ) {}
 
   @ApiOkResponse({ status: 200, type: RegisterResponseDto })
   @HttpCode(201)
   @Post()
   async addStaff(@Body() request: CreateUserDto) {
-    request.roleId = 'admin';
+    request.roleId = UserRole.admin;
     const user = await this.userService.register(request);
     const data = await this.userService.findOne(user.id);
+    await this.notificationGenerator.sendStaffWelcomeMail(
+      data,
+      request.password,
+    );
     return {
       status: true,
       message: 'registration successful',
@@ -77,10 +86,13 @@ export class StaffController {
     if (user.role.tag != RoleTag.admin) {
       throw new ForbiddenException('specified user is not an admin');
     }
+    if (request.email) {
+      this.userService.checkEmail(request.email, user.id);
+    }
     const data = await this.userService.update(id, request);
     return {
       status: true,
-      message: 'registration successful',
+      message: 'staff updated successfully',
       data,
     };
   }

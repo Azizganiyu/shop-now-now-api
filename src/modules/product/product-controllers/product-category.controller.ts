@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -48,8 +49,10 @@ export class ProductCategoryController {
   @ApiOkResponse({ type: ProductCategoryResponseAll })
   @HttpCode(200)
   @Get()
-  async findAll(): Promise<{ status: boolean; message: string; data: any }> {
-    const data = await this.categoryService.findAll();
+  async findAll(
+    @Query('includeInactive') includeInactive: number,
+  ): Promise<{ status: boolean; message: string; data: any }> {
+    const data = await this.categoryService.findAll(includeInactive);
     return {
       status: true,
       message: 'categories retrieved',
@@ -136,7 +139,7 @@ export class ProductCategoryController {
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
   @ApiParam({ name: 'id', description: 'Category ID' })
-  @Patch(':id/activate')
+  @Patch('activate/:id')
   async activate(
     @Param('id') id: string,
   ): Promise<{ status: boolean; message: string }> {
@@ -158,7 +161,7 @@ export class ProductCategoryController {
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
   @ApiParam({ name: 'id', description: 'Category ID' })
-  @Patch(':id/deactivate')
+  @Patch('deactivate/:id')
   async deactivate(
     @Param('id') id: string,
   ): Promise<{ status: boolean; message: string }> {

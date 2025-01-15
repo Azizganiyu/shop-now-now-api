@@ -3,27 +3,25 @@ import { RoleSeed } from './seeds/role.seed';
 import { AdminSeed } from './seeds/admin.seed';
 import { DataSource } from 'typeorm';
 import { ProductCategorySeed } from './seeds/product-category.seed';
-import { ProductSubCategorySeed } from './seeds/product-sub-category.seed';
-import { ProductManufacturerSeed } from './seeds/product-manufacturer.seed';
-import { ProductPresentationSeed } from './seeds/product-presentation.seed';
-import { ProductPackUnitSeed } from './seeds/product-pack-unit.seed';
-import { ProductStrengthUnitSeed } from './seeds/product-strength-unit.seed';
 import { ProductSeed } from './seeds/product.seed';
+import { FaqSeed } from './seeds/faq.seed';
+import { QuickGuideSeed } from './seeds/quick-guide.seed';
+import { LocationSeed } from './seeds/location.seed';
+import { ConfigSeed } from './seeds/config.seed';
 
 @Injectable()
 export class SeederService {
-  // private seeds = [ProductSeed];
-  private seeds = [
-    RoleSeed,
-    AdminSeed,
-    ProductCategorySeed,
-    ProductSubCategorySeed,
-    ProductManufacturerSeed,
-    ProductPresentationSeed,
-    ProductPackUnitSeed,
-    ProductStrengthUnitSeed,
-    ProductSeed,
-  ];
+  private seeds = [FaqSeed, QuickGuideSeed, LocationSeed, ConfigSeed];
+  // private seeds = [
+  //   RoleSeed,
+  //   AdminSeed,
+  //   ProductCategorySeed,
+  //   ProductSeed,
+  //   FaqSeed,
+  //   QuickGuideSeed,
+  //   LocationSeed,
+  //   ConfigSeed,
+  // ];
 
   constructor(
     private readonly logger: Logger,

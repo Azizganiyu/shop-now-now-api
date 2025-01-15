@@ -8,7 +8,7 @@ import {
   IsUrl,
 } from 'class-validator';
 
-class Descriptors {
+export class CreateProductCategory {
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
@@ -17,9 +17,7 @@ class Descriptors {
   @ApiPropertyOptional()
   @IsOptional()
   description?: string;
-}
 
-class ProductCategoryDescriptor extends Descriptors {
   @ApiPropertyOptional()
   @IsOptional()
   imageUrl?: string;
@@ -29,26 +27,7 @@ class ProductCategoryDescriptor extends Descriptors {
   iconUrl?: string;
 }
 
-class ProductSubCategoryDescriptor extends Descriptors {
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  categoryId: string;
-}
-
-export class CreateProductCategory extends ProductCategoryDescriptor {}
-export class CreateProductSubCategory extends ProductSubCategoryDescriptor {}
-export class CreateProductPresentation extends Descriptors {}
-export class CreateProductManufacturer extends Descriptors {}
-export class CreateProductPackUnit extends Descriptors {}
-export class CreateProductStrengthUnit extends Descriptors {}
-
-export class UpdateProductCategory extends ProductCategoryDescriptor {}
-export class UpdateProductSubCategory extends ProductSubCategoryDescriptor {}
-export class UpdateProductPresentation extends Descriptors {}
-export class UpdateProductManufacturer extends Descriptors {}
-export class UpdateProductPackUnit extends Descriptors {}
-export class UpdateProductStrengthUnit extends Descriptors {}
+export class UpdateProductCategory extends CreateProductCategory {}
 
 export class CreateProduct {
   @ApiProperty()
@@ -59,20 +38,6 @@ export class CreateProduct {
   @ApiPropertyOptional()
   @IsOptional()
   description?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  ingredient?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  packSize?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  packUnitId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -98,30 +63,8 @@ export class CreateProduct {
 
   @ApiPropertyOptional()
   @IsOptional()
-  subCategoryId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  presentationId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  manufacturerId?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsUrl()
+  // @IsUrl()
   image?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsNumber()
-  @IsPositive()
-  strength?: number;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  strengthUnitId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

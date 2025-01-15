@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/services/mail.service';
 import { Brackets, Repository } from 'typeorm';
 import { FindNotificationDto } from './dto/find-notification.dto';
-import { NotificationDto } from './dto/notification.dto';
+import { NotificationDto, SendMessageDto } from './dto/notification.dto';
 import { Notification } from './entities/notification.entity';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
@@ -16,6 +16,8 @@ import {
 import { User } from '../user/entities/user.entity';
 import { HelperService } from 'src/utilities/helper.service';
 import { NotificationReadReceipt } from './entities/notification-read-receipt.entity';
+import { UserRole } from '../user/dto/user.dto';
+import { NotificationGeneratorService } from './notification-generator/notification-generator.service';
 
 @Injectable()
 export class NotificationService {
@@ -29,6 +31,7 @@ export class NotificationService {
     private mailService: MailService,
     private requestContext: RequestContextService,
     private helperService: HelperService,
+    private _ng: NotificationGeneratorService,
   ) {}
 
   /**
@@ -171,5 +174,25 @@ export class NotificationService {
       return;
     }
     return await this.readReceiptRepository.save({ notificationId, userId });
+  }
+
+  async message(payload: SendMessageDto) {
+    let users: User[] = [];
+    if (payload.userId) {
+      users = await this.userRepository.findBy({ id: payload.userId });
+    } else if (payload.all) {
+      users = await this.userRepository.findBy({
+        roleId: UserRole.user,
+      });
+    }
+    for (const user of users) {
+      this._ng.broadcast({
+        subject: payload.subject,
+        message: payload.message,
+        attachment: payload.attachment,
+        user,
+        channel: ['email'],
+      });
+    }
   }
 }

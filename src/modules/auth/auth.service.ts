@@ -87,7 +87,6 @@ export class AuthService {
     let user: User = await this.userRepository.findOne({
       where: {
         email: request.email,
-        isDeleted: false,
       },
     });
     if (!user) {
@@ -118,7 +117,6 @@ export class AuthService {
       where: {
         email: request.email,
         code: await this.helperService.encrypt(request.code),
-        isDeleted: false,
       },
     });
     if (!user) {
@@ -159,7 +157,6 @@ export class AuthService {
     const user: User = await this.userRepository.findOne({
       where: {
         email,
-        isDeleted: false,
       },
       relations: ['role'],
     });

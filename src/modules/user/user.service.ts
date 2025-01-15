@@ -8,7 +8,7 @@ import { PageDto } from 'src/utilities/pagination/page.dto';
 import { FindUserDto } from './dto/find-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, IsNull, Not, Repository } from 'typeorm';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { CreateUserDto } from '../auth/dto/create-user.dto';
 import { CreateUserTransaction } from 'src/utilities/transactions/create-user-transaction';
@@ -75,11 +75,11 @@ export class UserService {
    * @returns {Promise<void>} A promise that resolves if the email address is unique.
    * @throws {BadRequestException} Thrown if the email address already exists.
    */
-  async checkEmail(email: string) {
+  async checkEmail(email: string, id: string = null) {
     const userCount = await this.userRepository.count({
       where: {
         email,
-        isDeleted: false,
+        id: id ? Not(id) : Not(IsNull()),
       },
     });
     if (userCount > 0) {
@@ -98,9 +98,6 @@ export class UserService {
     const users = this.userRepository
       .createQueryBuilder('user')
       .leftJoinAndSelect('user.role', 'role')
-      .where(`user.isDeleted = :deleted`, {
-        deleted: false,
-      })
       .andWhere(filter.status ? `user.status = :status` : '1=1', {
         status: filter.status,
       })
@@ -179,7 +176,7 @@ export class UserService {
    * @param reason - The reason for suspending the user's account.
    * @throws NotFoundException if the user with the provided ID is not found.
    */
-  async suspend(id: string, reason: string) {
+  async suspend(id: string) {
     const user = await this.findOne(id);
     await this.userRepository.update(
       {
@@ -189,7 +186,7 @@ export class UserService {
     );
     const activity: Activity = {
       event: 'user suspended',
-      description: `${this.helperService.getFullName(user)} suspended at ${new Date().toISOString()}. ${reason}`,
+      description: `${this.helperService.getFullName(user)} suspended at ${new Date().toISOString()}`,
       ipAddress: this.requestContext.ip,
       userId: user.id,
       object: 'user',
@@ -205,7 +202,7 @@ export class UserService {
    * @param reason - The reason for unsuspending the user's account.
    * @throws NotFoundException if the user with the provided ID is not found.
    */
-  async unsuspend(id: string, reason: string) {
+  async unsuspend(id: string) {
     const user = await this.findOne(id);
     await this.userRepository.update(
       {
@@ -215,7 +212,7 @@ export class UserService {
     );
     const activity: Activity = {
       event: 'user unsuspended',
-      description: `${this.helperService.getFullName(user)} unsuspended at ${new Date().toISOString()}. ${reason}`,
+      description: `${this.helperService.getFullName(user)} unsuspended at ${new Date().toISOString()}`,
       ipAddress: this.requestContext.ip,
       userId: user.id,
       object: 'user',
@@ -236,9 +233,9 @@ export class UserService {
       throw new BadRequestException('Email provided does not match user email');
     }
     // Delete the user's account
-    await this.userRepository.update(user.id, { isDeleted: true });
+    await this.userRepository.softDelete(user.id);
     // Delete the user's current session
-    await this.sessionService.deleteCurrentSession();
+    await this.sessionService.deleteUserSession(user.id);
   }
 
   /**
@@ -272,5 +269,15 @@ export class UserService {
   async update(id: string, data: QueryDeepPartialEntity<User>) {
     await this.userRepository.update(id, data);
     return await this.findOne(id);
+  }
+
+  async summary() {
+    return {
+      totalUsers: await this.userRepository.countBy({ roleId: UserRole.user }),
+      activeUsers: await this.userRepository.countBy({
+        roleId: UserRole.user,
+        status: 'active',
+      }),
+    };
   }
 }

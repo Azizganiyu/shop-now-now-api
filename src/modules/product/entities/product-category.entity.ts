@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Product } from './product.entity';
-import { ProductSubCategory } from './product-sub-category.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity()
@@ -29,9 +28,6 @@ export class ProductCategory {
 
   @OneToMany(() => Product, (product) => product.category)
   products?: Product[];
-
-  @OneToMany(() => ProductSubCategory, (subCategory) => subCategory.category)
-  subCategories?: ProductSubCategory[];
 
   @ApiProperty()
   @Column({ default: true })

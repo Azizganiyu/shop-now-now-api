@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { NotificationDto } from '../dto/notification.dto';
+import { MessageAttachment, NotificationDto } from '../dto/notification.dto';
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EmailNotification } from '../dto/notification-message.dto';
+import { User } from 'src/modules/user/entities/user.entity';
 
 export interface NotificationGeneratorDto {
   userId?: string;
@@ -119,6 +120,51 @@ export class NotificationGeneratorService {
       message: { mail },
       ...request,
     };
+    this.notificationQueue.add('notification', notification);
+  }
+
+  async sendStaffWelcomeMail(user: User, password: string) {
+    const mail: EmailNotification = {
+      subject: `Welcome to the Team!`,
+      message: `
+      <p>We're thrilled to have you on board.</p>
+      <p>Please use the below credentials to gain access to your account</p>
+      <p><hr></p>
+      <h5><strong>Email: </strong> ${user.email}</h5>
+      <h5><strong>Password: </strong> ${password}</h5>
+      <p><hr></p>`,
+      preference: this.preference,
+    };
+    const notification: NotificationDto = {
+      message: { mail },
+      channels: ['email'],
+      userId: user.id,
+    };
+    this.notificationQueue.add('notification', notification);
+  }
+
+  async broadcast(data: {
+    subject: string;
+    message: string;
+    attachment: MessageAttachment;
+    user: User;
+    channel: any[];
+  }) {
+    const image = data.attachment
+      ? `<span>${data.attachment.name} | ${data.attachment.size / 1000000}mb</span> <br/> <img width="300" src="${data.attachment.url}" />`
+      : '';
+    const mail: EmailNotification = {
+      subject: data.subject,
+      message: `<p>${data.message}</p> <p> <strong></strong> ${image} </p>`,
+      preference: this.preference,
+    };
+    const notification: NotificationDto = {
+      message: { mail },
+      channels: data.channel,
+      userId: data.user.id,
+    };
+
+    console.log(notification);
     this.notificationQueue.add('notification', notification);
   }
 }

@@ -39,7 +39,7 @@ export class SessionService {
       }
       throw new UnauthorizedException('Session expired');
     } else {
-      now.setHours(now.getHours() + 6);
+      now.setDate(now.getDate() + 3);
       return await this.sessionRepository.update(session.id, {
         expiresAt: now,
       });
@@ -57,7 +57,7 @@ export class SessionService {
    */
   async save(userId: string, token: string, device: DeviceDetectorResult) {
     const now = new Date();
-    now.setHours(now.getHours() + 1);
+    now.setDate(now.getDate() + 3);
     const data: Ssions = {
       token,
       clientName: device.client?.name ?? '',
@@ -121,6 +121,15 @@ export class SessionService {
     return await this.sessionRepository.update(
       {
         token: this.requestContext.token,
+      },
+      { status: false },
+    );
+  }
+
+  async deleteUserSession(userId: string) {
+    return await this.sessionRepository.update(
+      {
+        userId,
       },
       { status: false },
     );

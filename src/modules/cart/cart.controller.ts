@@ -143,7 +143,7 @@ export class CartController {
     await this.cartService.deleteWishList(id);
     return {
       status: true,
-      message: 'wishlist deleted successfully',
+      message: 'Saved List deleted successfully',
     };
   }
 }

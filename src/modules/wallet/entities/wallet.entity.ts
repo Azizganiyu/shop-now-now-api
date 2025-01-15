@@ -26,6 +26,10 @@ export class Wallet {
   balance: number;
 
   @ApiProperty()
+  @Column({ nullable: true, type: 'double precision', default: 0 })
+  points: number;
+
+  @ApiProperty()
   @Column()
   @Exclude()
   userId: string;

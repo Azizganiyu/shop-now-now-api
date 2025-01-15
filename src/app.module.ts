@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
-import { ScheduleModule } from '@nestjs/schedule';
+import { ScheduleModule as ScheduleCron } from '@nestjs/schedule';
 import { MulterModule } from '@nestjs/platform-express';
 import { ConfigModule } from '@nestjs/config';
 import authConfig from './configs/auth.config';
@@ -37,11 +37,17 @@ import { StaffModule } from './modules/staff/staff.module';
 import paystackConfig from './configs/paystack.config';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
-import { MedicationRequestModule } from './modules/medication-request/medication-request.module';
+import { QuickGuideModule } from './modules/quick-guide/quick-guide.module';
 import { HealthCalculatorModule } from './modules/health-calculator/health-calculator.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { SpecialRequestModule } from './modules/special-request/special-request.module';
+import { FaqModule } from './modules/faq/faq.module';
+import { LocationModule } from './modules/location/location.module';
+import { CouponModule } from './modules/coupon/coupon.module';
+import { ScheduleModule } from './modules/schedule/schedule.module';
+import { AppConfigModule } from './modules/app-config/app-config.module';
+import { BannerModule } from './modules/banner/banner.module';
 
 @Module({
   imports: [
@@ -56,7 +62,7 @@ import { SpecialRequestModule } from './modules/special-request/special-request.
         limit: 50,
       },
     ]),
-    ScheduleModule.forRoot(),
+    ScheduleCron.forRoot(),
     MulterModule.register({
       dest: './uploads',
     }),
@@ -89,11 +95,17 @@ import { SpecialRequestModule } from './modules/special-request/special-request.
     StaffModule,
     PaymentModule,
     ReviewModule,
-    MedicationRequestModule,
+    QuickGuideModule,
     HealthCalculatorModule,
     WalletModule,
     TransactionModule,
     SpecialRequestModule,
+    FaqModule,
+    LocationModule,
+    CouponModule,
+    ScheduleModule,
+    AppConfigModule,
+    BannerModule,
   ],
   controllers: [AppController],
   providers: [

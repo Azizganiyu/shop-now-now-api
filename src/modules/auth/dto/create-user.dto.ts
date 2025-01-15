@@ -43,7 +43,7 @@ export class CreateUserDto {
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
-  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/, {
     message:
       'Password must contain at least one uppercase letter, one number, one special character, and be at least 8 characters long',
   })
@@ -69,4 +69,19 @@ export class UpdateUserDto {
   @ApiPropertyOptional()
   @MaxLength(199)
   phone?: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  @MaxLength(199)
+  @IsEmail()
+  email?: string;
+}
+
+export class UpdateAvatarDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @MaxLength(199)
+  @MinLength(3)
+  avatar: string;
 }

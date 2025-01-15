@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Order } from './order.entity';
 import { ShipmentStatus } from '../dto/order.dto';
+import { Location } from 'src/modules/location/entities/location.entity';
 
 @Entity()
 export class OrderShipment {
@@ -33,11 +34,10 @@ export class OrderShipment {
 
   @Column()
   @ApiProperty()
-  state: string;
+  locationId: string;
 
-  @Column()
-  @ApiProperty()
-  city: string;
+  @ManyToOne(() => Location, (location) => location.shipments)
+  location?: Location;
 
   @Column()
   @ApiProperty()
@@ -52,6 +52,48 @@ export class OrderShipment {
     default: 0,
   })
   amount: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  discount?: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  discountValue?: number;
+
+  @ApiProperty()
+  @Column({
+    type: 'double',
+    scale: 2,
+    precision: 20,
+    nullable: true,
+    default: 0,
+  })
+  pointToCredit?: number;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  discountType?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  discountValueType?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  couponCode?: string;
 
   @ApiProperty()
   @Column({

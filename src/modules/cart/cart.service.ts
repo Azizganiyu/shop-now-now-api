@@ -93,9 +93,7 @@ export class CartService {
       return sum + cart.product.sellingPrice * cart.quantity;
     }, 0);
 
-    const tax = (10 / 100) * amount;
-    const deliveryFee = 1500;
-    const amountToPay = amount + tax + deliveryFee;
+    const amountToPay = checkout.amountToPay;
 
     return await this.entityManager.transaction(
       async (transactionalEntityManager) => {
@@ -122,12 +120,17 @@ export class CartService {
             email: address.email,
             phone: address.phone,
             address: address.address,
-            city: address.city,
-            state: address.state,
+            locationId: address.locationId,
             amount,
             amountToPay,
-            tax,
-            deliveryFee,
+            tax: checkout.tax,
+            discount: checkout.discount,
+            discountType: checkout.discountType,
+            discountValue: checkout.discountValue,
+            discountValueType: checkout.discountValueType,
+            couponCode: checkout.couponCode,
+            deliveryFee: checkout.deliveryFee,
+            pointToCredit: checkout.pointToCredit,
             orderId: order.id,
             reference: 'INV' + this.helperService.generateRandomAlphaNum(8),
             expectedDeliveryDate: this.helperService.setDateFuture(
