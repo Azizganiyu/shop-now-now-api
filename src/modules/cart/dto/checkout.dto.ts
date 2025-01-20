@@ -26,16 +26,6 @@ export enum PaymentStatus {
 }
 
 export class CartCheckout {
-  // @ApiProperty()
-  // @IsDefined()
-  // @IsNotEmpty()
-  // paymentRef: string;
-
-  // @ApiProperty()
-  // @IsDefined()
-  // @IsNotEmpty()
-  // addressId: string;
-
   @ApiProperty()
   @IsPositive()
   @IsNumber()
@@ -105,4 +95,9 @@ export class CartCheckout {
   @IsDefined()
   @IsNotEmpty()
   pointToCredit: number;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  expectedDeliveryDate: Date;
 }

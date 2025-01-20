@@ -27,7 +27,9 @@ export class SpecialRequestService {
     const requests = this.requestRepository
       .createQueryBuilder('request')
       .leftJoinAndSelect('request.user', 'user')
-      .orderBy('request.createdAt', pageOptionsDto.order);
+      .orderBy('request.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
 
     const itemCount = await requests.getCount();
     const { entities } = await requests.getRawAndEntities();

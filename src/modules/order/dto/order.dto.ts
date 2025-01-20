@@ -1,17 +1,31 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsDefined, IsEnum, IsNotEmpty } from 'class-validator';
+
 export enum OrderStatus {
   pending = 'pending',
   completed = 'completed',
-  running = 'running',
   canceled = 'canceled',
 }
 
 export enum ShipmentStatus {
   pending = 'pending',
   processing = 'processing',
-  completed = 'completed',
+  in_transit = 'in-transit',
+  delivered = 'delivered',
+  canceled = 'canceled',
 }
 
 export enum OrderTypes {
   onetime = 'onetime',
   recurring = 'running',
+}
+
+export class ChangeOrderStatusDto {
+  @ApiProperty({
+    enum: ShipmentStatus,
+  })
+  @IsDefined()
+  @IsNotEmpty()
+  @IsEnum(ShipmentStatus)
+  status: ShipmentStatus;
 }

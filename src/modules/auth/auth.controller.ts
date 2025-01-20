@@ -151,7 +151,7 @@ export class UserAuthController {
     @Body() request: EmailDto,
   ): Promise<{ status: boolean; message: string }> {
     const user = await this.userService.findOneByEmail(request.email);
-    await this.userService.sendVerificationMail(request.email, user.code);
+    await this.userService.sendVerificationMail(user);
     return {
       status: true,
       message: 'Email verification successfully sent to ' + request.email,

@@ -54,17 +54,22 @@ export class UserService {
     const user = await this.createUserTransaction.run(data);
 
     if (user.roleId === UserRole.user) {
-      await this.sendVerificationMail(user.email, user.code);
+      await this.sendVerificationMail(user);
     }
 
     return user;
   }
 
-  async sendVerificationMail(email: string, code: string) {
-    await this.notificationGenerator.sendVerificationMail(
+  async sendVerificationMail(user: User) {
+    const code = this.helperService.generateCode();
+    await this.userRepository.update(user.id, {
+      code: await this.helperService.encrypt(code),
+      tokenExpireAt: this.helperService.setDateFuture(3600),
+    });
+    this.notificationGenerator.sendVerificationMail(
       { channels: ['email'] },
-      email,
-      await this.helperService.decrypt(code),
+      user.email,
+      code,
     );
   }
 

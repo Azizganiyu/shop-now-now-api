@@ -17,6 +17,10 @@ export class FindOrderDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  search?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   from?: Date;
 
   @ApiPropertyOptional()

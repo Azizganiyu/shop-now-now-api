@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { HelperService } from 'src/utilities/helper.service';
 import { FindShipmentDto } from './dto/find-shipment.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
@@ -9,6 +13,7 @@ import { OrderShipment } from './entities/order-shipment.entity';
 import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
 import { PageDto } from 'src/utilities/pagination/page.dto';
 import { FindOrderDto } from './dto/find-order.dto';
+import { OrderStatus, ShipmentStatus } from './dto/order.dto';
 
 @Injectable()
 export class OrderService {
@@ -38,6 +43,7 @@ export class OrderService {
       .leftJoinAndSelect('items.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('order.shipments', 'shipments')
+      .leftJoinAndSelect('shipments.location', 'locationo')
       .leftJoinAndSelect('order.user', 'user')
       .andWhere(filter.userId ? `order.userId = :userId` : '1=1', {
         userId: filter.userId,
@@ -51,7 +57,24 @@ export class OrderService {
       .andWhere(filter.to ? `order.createdAt <= :toDate` : '1=1', {
         toDate: filter.to,
       })
-      .orderBy('order.createdAt', pageOptionsDto.order);
+      .andWhere(
+        filter.search
+          ? new Brackets((qb) => {
+              qb.where('user.firstName like :firstName', {
+                firstName: '%' + filter.search + '%',
+              })
+                .orWhere('user.lastName like :lastName', {
+                  lastName: '%' + filter.search + '%',
+                })
+                .orWhere('user.email like :email', {
+                  email: '%' + filter.search + '%',
+                });
+            })
+          : '1=1',
+      )
+      .orderBy('order.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
 
     const itemCount = await orders.getCount();
     const { entities } = await orders.getRawAndEntities();
@@ -80,7 +103,9 @@ export class OrderService {
       .andWhere(filter.to ? `shipment.createdAt <= :toDate` : '1=1', {
         toDate: filter.to,
       })
-      .orderBy('shipment.createdAt', pageOptionsDto.order);
+      .orderBy('shipment.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
 
     const itemCount = await shipments.getCount();
     const { entities } = await shipments.getRawAndEntities();
@@ -100,5 +125,64 @@ export class OrderService {
       return true;
     }
     return false;
+  }
+
+  async changeStatus(orderId: string, status: ShipmentStatus) {
+    switch (status) {
+      case ShipmentStatus.pending: {
+        await this.orderRepository.update(orderId, {
+          status: OrderStatus.pending,
+        });
+        await this.shipmentRepository.update(
+          { orderId },
+          { status: ShipmentStatus.pending },
+        );
+        break;
+      }
+      case ShipmentStatus.processing: {
+        await this.orderRepository.update(orderId, {
+          status: OrderStatus.pending,
+        });
+        await this.shipmentRepository.update(
+          { orderId },
+          { status: ShipmentStatus.processing },
+        );
+        break;
+      }
+      case ShipmentStatus.in_transit: {
+        await this.orderRepository.update(orderId, {
+          status: OrderStatus.pending,
+        });
+        await this.shipmentRepository.update(
+          { orderId },
+          { status: ShipmentStatus.in_transit },
+        );
+        break;
+      }
+      case ShipmentStatus.delivered: {
+        await this.orderRepository.update(orderId, {
+          status: OrderStatus.completed,
+        });
+        await this.shipmentRepository.update(
+          { orderId },
+          { status: ShipmentStatus.delivered },
+        );
+        //send mail
+        break;
+      }
+      case ShipmentStatus.canceled: {
+        await this.orderRepository.update(orderId, {
+          status: OrderStatus.canceled,
+        });
+        await this.shipmentRepository.update(
+          { orderId },
+          { status: ShipmentStatus.canceled },
+        );
+        //send mail
+        break;
+      }
+      default:
+        throw new BadRequestException('invalid status');
+    }
   }
 }

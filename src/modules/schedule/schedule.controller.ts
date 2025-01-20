@@ -59,16 +59,17 @@ export class ScheduleController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('admin')
+  @Roles('user')
   @ApiOkResponse()
   @HttpCode(200)
   @ApiParam({ name: 'id', description: 'Location ID' })
-  @Patch('activate/:id')
-  async activate(@Param('id') id: string) {
-    await this.scheduleService.activate(id);
+  @Get('location/:id')
+  async getLocationSchedules(@Param('id') id: string) {
+    const data = await this.scheduleService.getLocationSchedules(id);
     return {
       status: true,
-      message: 'location activated',
+      message: 'schedules retreived',
+      data,
     };
   }
 
@@ -76,13 +77,27 @@ export class ScheduleController {
   @Roles('admin')
   @ApiOkResponse()
   @HttpCode(200)
-  @ApiParam({ name: 'id', description: 'Location ID' })
+  @ApiParam({ name: 'id', description: 'Schedule ID' })
+  @Patch('activate/:id')
+  async activate(@Param('id') id: string) {
+    await this.scheduleService.activate(id);
+    return {
+      status: true,
+      message: 'schedule activated',
+    };
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiOkResponse()
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Schedule ID' })
   @Patch('deactivate/:id')
   async deactivate(@Param('id') id: string) {
     await this.scheduleService.deactivate(id);
     return {
       status: true,
-      message: 'location deactivated',
+      message: 'schedule deactivated',
     };
   }
 

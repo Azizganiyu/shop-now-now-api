@@ -48,6 +48,7 @@ import { CouponModule } from './modules/coupon/coupon.module';
 import { ScheduleModule } from './modules/schedule/schedule.module';
 import { AppConfigModule } from './modules/app-config/app-config.module';
 import { BannerModule } from './modules/banner/banner.module';
+import { OverviewModule } from './modules/overview/overview.module';
 
 @Module({
   imports: [
@@ -106,6 +107,7 @@ import { BannerModule } from './modules/banner/banner.module';
     ScheduleModule,
     AppConfigModule,
     BannerModule,
+    OverviewModule,
   ],
   controllers: [AppController],
   providers: [

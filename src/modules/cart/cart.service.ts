@@ -14,7 +14,6 @@ import { OrderItem } from '../order/entities/order-item.entity';
 import { ActivityService } from '../activity/activity.service';
 import { OrderShipment } from '../order/entities/order-shipment.entity';
 import { HelperService } from 'src/utilities/helper.service';
-import { DeliveryGeneralEstimate } from './delivery-estimates';
 import { Address } from '../address/entities/address.entity';
 import { PaymentService } from '../payment/payment.service';
 import { User } from '../user/entities/user.entity';
@@ -133,9 +132,7 @@ export class CartService {
             pointToCredit: checkout.pointToCredit,
             orderId: order.id,
             reference: 'INV' + this.helperService.generateRandomAlphaNum(8),
-            expectedDeliveryDate: this.helperService.setDateFuture(
-              DeliveryGeneralEstimate.duration * 86400,
-            ),
+            expectedDeliveryDate: checkout.expectedDeliveryDate,
           },
         );
 

@@ -21,6 +21,7 @@ import { HelperService } from 'src/utilities/helper.service';
 import { RequestContextService } from 'src/utilities/request-context.service';
 import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 import { User } from '../user/entities/user.entity';
+import { UserService } from '../user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -34,6 +35,7 @@ export class AuthService {
     private userRepository: Repository<User>,
     private requestContext: RequestContextService,
     private notificationGenerator: NotificationGeneratorService,
+    private userService: UserService,
   ) {}
 
   /**
@@ -167,11 +169,7 @@ export class AuthService {
       throw new UnauthorizedException('Account suspended');
     }
     if (!user.emailVerifiedAt) {
-      this.notificationGenerator.sendVerificationMail(
-        { channels: ['email'] },
-        email,
-        await this.helperService.decrypt(user.code),
-      );
+      await this.userService.sendVerificationMail(user);
       throw new HttpException(
         {
           status: HttpStatus.EXPECTATION_FAILED,

@@ -44,7 +44,9 @@ export class ReviewService {
       .andWhere(filter.productId ? `review.productId = :productId` : '1=1', {
         productId: filter.productId,
       })
-      .orderBy('review.createdAt', pageOptionsDto.order);
+      .orderBy('review.createdAt', pageOptionsDto.order)
+      .skip(pageOptionsDto.skip)
+      .take(pageOptionsDto.take);
 
     const itemCount = await reviews.getCount();
     const { entities } = await reviews.getRawAndEntities();

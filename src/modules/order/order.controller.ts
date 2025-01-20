@@ -1,9 +1,11 @@
 import {
+  Body,
   ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
   Param,
+  Post,
   Query,
   UseGuards,
   UseInterceptors,
@@ -29,6 +31,7 @@ import {
   ShipmentResponseAll,
 } from './order-responses';
 import { RoleTag } from 'src/constants/roletag';
+import { ChangeOrderStatusDto } from './dto/order.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('user', 'admin')
@@ -73,6 +76,22 @@ export class OrderController {
     return {
       status: true,
       message: 'shipments retreived',
+      data,
+    };
+  }
+
+  @ApiOkResponse({ type: ShipmentResponseAll })
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'Order ID' })
+  @Post(':id/change-status')
+  async changeOrderStatus(
+    @Param('id') id: string,
+    @Body() payload: ChangeOrderStatusDto,
+  ) {
+    const data = await this.orderService.changeStatus(id, payload.status);
+    return {
+      status: true,
+      message: 'order status changed successfully',
       data,
     };
   }

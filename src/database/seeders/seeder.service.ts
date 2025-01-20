@@ -11,17 +11,17 @@ import { ConfigSeed } from './seeds/config.seed';
 
 @Injectable()
 export class SeederService {
-  private seeds = [RoleSeed, AdminSeed, ProductSeed];
-  // private seeds = [
-  //   RoleSeed,
-  //   AdminSeed,
-  //   ProductCategorySeed,
-  //   ProductSeed,
-  //   FaqSeed,
-  //   QuickGuideSeed,
-  //   LocationSeed,
-  //   ConfigSeed,
-  // ];
+  // private seeds = [RoleSeed, AdminSeed, ProductSeed];
+  private seeds = [
+    RoleSeed,
+    AdminSeed,
+    ProductCategorySeed,
+    ProductSeed,
+    FaqSeed,
+    QuickGuideSeed,
+    LocationSeed,
+    ConfigSeed,
+  ];
 
   constructor(
     private readonly logger: Logger,
