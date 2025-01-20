@@ -219,15 +219,14 @@ export class TransactionService {
       settledAt: new Date(),
       paymentProvider: charge.paymentProvider,
     };
-    const debit = await this.walletService.debit({
-      userId: charge.userId,
-      amount: trx.amountSettled,
-      transaction: trx,
-    });
-    // this.notificationGenerator.sendTransactionNotification(
-    //   debit.transaction.id,
-    //   debit.transaction.purpose as TransactionPurpose,
-    // );
+    const debit = await this.walletService.rawDebit(
+      {
+        userId: charge.userId,
+        amount: trx.amountSettled,
+        transaction: trx,
+      },
+      true,
+    );
     return debit.transaction;
   }
 }

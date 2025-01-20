@@ -12,11 +12,14 @@ import {
   CreditTransaction,
 } from 'src/utilities/transactions/credit-transaction';
 import { Wallet } from './entities/wallet.entity';
+import { Transaction } from '../transaction/entities/transaction.entity';
 
 @Injectable()
 export class WalletService {
   constructor(
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
+    @InjectRepository(Transaction)
+    private transactionRepository: Repository<Transaction>,
     private readonly debitTransaction: DebitTransaction,
     private readonly creditTransaction: CreditTransaction,
   ) {}
@@ -52,8 +55,14 @@ export class WalletService {
         throw new BadRequestException('insufficient balance');
       }
     }
+    let transaction: Transaction = null;
     await this.walletRepository.update(wallet.id, { balance: balanceAfter });
-    return { balanceBefore, balanceAfter };
+    if (request.transaction) {
+      request.transaction.balanceBefore = balanceBefore;
+      request.transaction.balanceAfter = balanceAfter;
+      transaction = await this.transactionRepository.save(request.transaction);
+    }
+    return { balanceBefore, balanceAfter, transaction };
   }
 
   /**
