@@ -31,12 +31,16 @@ import { PageDto } from 'src/utilities/pagination/page.dto';
 import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
 import { FindPaymentDto } from './dto/find-payment.dto';
 import { Product } from '../product/entities/product.entity';
+import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
+import { Order } from '../order/entities/order.entity';
 
 @Injectable()
 export class PaymentService {
   constructor(
     @InjectRepository(OrderShipment)
     private readonly shipmentRepository: Repository<OrderShipment>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     @InjectRepository(Wallet)
@@ -49,6 +53,7 @@ export class PaymentService {
     private httpService: HttpService,
     private activityService: ActivityService,
     private helperService: HelperService,
+    private _ng: NotificationGeneratorService,
   ) {}
 
   async initialize(
@@ -257,6 +262,11 @@ export class PaymentService {
         stock: newStock < 0 ? 0 : newStock,
       });
     }
+    const order = await this.orderRepository.findOneOrFail({
+      where: { id: shipment.orderId },
+      relations: ['shipments', 'shipments.location', 'items', 'items.product'],
+    });
+    await this._ng.sendOrderUpdate(order);
   }
 
   async findOne(id: string) {

@@ -13,6 +13,7 @@ import { NotificationController } from './notification.controller';
 import { User } from '../user/entities/user.entity';
 import { NotificationReadReceipt } from './entities/notification-read-receipt.entity';
 import { ConfigService } from '@nestjs/config';
+import { OrderReceipt } from './notification-generator/order.receipt';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { ConfigService } from '@nestjs/config';
     NotificationGeneratorService,
     HelperService,
     RequestContextService,
+    OrderReceipt,
   ],
   exports: [
     NotificationService,

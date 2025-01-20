@@ -5,6 +5,9 @@ import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
 import { EmailNotification } from '../dto/notification-message.dto';
 import { User } from 'src/modules/user/entities/user.entity';
+import { OrderReceipt } from './order.receipt';
+import { Order } from 'src/modules/order/entities/order.entity';
+import { ShipmentStatus } from 'src/modules/order/dto/order.dto';
 
 export interface NotificationGeneratorDto {
   userId?: string;
@@ -16,6 +19,7 @@ export class NotificationGeneratorService {
     private configService: ConfigService,
     @InjectQueue(process.env.BULL_NOTIFICATION_QUEUE)
     private readonly notificationQueue: Queue,
+    private orderReceipt: OrderReceipt,
   ) {}
 
   get preference() {
@@ -165,6 +169,54 @@ export class NotificationGeneratorService {
     };
 
     console.log(notification);
+    this.notificationQueue.add('notification', notification);
+  }
+
+  async sendOrderUpdate(order: Order) {
+    let info = '';
+    let subject = '';
+
+    switch (order.shipments[0].status) {
+      case ShipmentStatus.processing:
+        subject = 'Order Confirmation';
+        info =
+          'Thank you for shopping with us. Your order has been confirmed and is now being processed.';
+        break;
+
+      case ShipmentStatus.in_transit:
+        subject = 'Order Shipped';
+        info =
+          'Your order is on the way! It has been shipped and is currently in transit to your address. We will notify you once it arrives.';
+        break;
+
+      case ShipmentStatus.canceled:
+        subject = 'Order Canceled';
+        info =
+          'We regret to inform you that your order has been canceled. If you believe this was a mistake, please contact our support team.';
+        break;
+
+      case ShipmentStatus.delivered:
+        subject = 'Order Delivered';
+        info =
+          'Great news! Your order has been successfully delivered. We hope you are enjoying your purchase. Thank you for choosing us!';
+        break;
+
+      default:
+        subject = 'Order Status Update';
+        info =
+          'Your order status has been updated. Please check your account for more details.';
+    }
+
+    const mail: EmailNotification = {
+      subject,
+      message: this.orderReceipt.generateProcessing(info, order),
+      preference: this.preference,
+    };
+    const notification: NotificationDto = {
+      message: { mail },
+      channels: ['email'],
+      userId: order.userId,
+    };
     this.notificationQueue.add('notification', notification);
   }
 }

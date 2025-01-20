@@ -14,6 +14,7 @@ import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
 import { PageDto } from 'src/utilities/pagination/page.dto';
 import { FindOrderDto } from './dto/find-order.dto';
 import { OrderStatus, ShipmentStatus } from './dto/order.dto';
+import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 
 @Injectable()
 export class OrderService {
@@ -23,13 +24,19 @@ export class OrderService {
     @InjectRepository(OrderShipment)
     private readonly shipmentRepository: Repository<OrderShipment>,
     private helperService: HelperService,
+    private _ng: NotificationGeneratorService,
   ) {}
 
   async findOne(id: string) {
     try {
       return await this.orderRepository.findOneOrFail({
         where: [{ id }, { reference: id }],
-        relations: ['shipments', 'shipments.location', 'items'],
+        relations: [
+          'shipments',
+          'shipments.location',
+          'items',
+          'items.product',
+        ],
       });
     } catch (error) {
       throw new NotFoundException('no order with specified ID found');
@@ -184,5 +191,7 @@ export class OrderService {
       default:
         throw new BadRequestException('invalid status');
     }
+    const order = await this.findOne(orderId);
+    await this._ng.sendOrderUpdate(order);
   }
 }

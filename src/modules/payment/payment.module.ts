@@ -9,6 +9,7 @@ import { OrderShipment } from '../order/entities/order-shipment.entity';
 import { TransactionModule } from '../transaction/transaction.module';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { Product } from '../product/entities/product.entity';
+import { Order } from '../order/entities/order.entity';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { Product } from '../product/entities/product.entity';
       OrderShipment,
       Wallet,
       Product,
+      Order,
     ]),
   ],
   controllers: [PaymentController],
