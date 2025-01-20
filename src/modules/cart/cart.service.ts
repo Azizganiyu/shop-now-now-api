@@ -23,6 +23,7 @@ import { ShipmentStatus } from '../order/dto/order.dto';
 import { TransactionService } from '../transaction/transaction.service';
 import { Wish } from './entities/wish.entity';
 import { WishItem } from './entities/wish-item.entity';
+import { Product } from '../product/entities/product.entity';
 
 @Injectable()
 export class CartService {
@@ -166,6 +167,18 @@ export class CartService {
             paid: true,
             status: ShipmentStatus.processing,
           });
+          for (const item of carts) {
+            const product = await transactionalEntityManager.findOneBy(
+              Product,
+              {
+                id: item.productId,
+              },
+            );
+            const newStock = product.stock - item.quantity;
+            await transactionalEntityManager.update(Product, product.id, {
+              stock: newStock < 0 ? 0 : newStock,
+            });
+          }
         }
 
         await this.deleteCart(user.id);

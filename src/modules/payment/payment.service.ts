@@ -60,7 +60,6 @@ export class PaymentService {
     request: InitializePaymentDto,
     user: User,
   ): Promise<InitializePaymentDataResponse> {
-    console.log('initializing payment', request.paymentProvider);
     switch (request.paymentProvider) {
       case PaymentProviders.PAYSTACK:
         return await this.initializePaystackPayment(request, user);
@@ -86,7 +85,6 @@ export class PaymentService {
           },
         ),
       );
-      console.log(response.data.data);
       const payment = this.paymentRequestRepository.create({
         code: response.data.data.access_code,
         url: response.data.data.authorization_url,
@@ -142,7 +140,6 @@ export class PaymentService {
           },
         ),
       );
-      console.log(response.data.data);
       if (response.data.data.status === 'success') {
         if (response.data.data.authorization?.reusable) {
           this.activityService.log(
@@ -228,7 +225,6 @@ export class PaymentService {
     amountPaid: number,
     shipmentRef: string,
   ) {
-    console.log(shipmentRef);
     const shipment = await this.shipmentRepository.findOne({
       where: { reference: shipmentRef },
       relations: ['order', 'order.items'],

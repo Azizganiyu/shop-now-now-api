@@ -102,7 +102,6 @@ export class OverviewService {
     GROUP BY \`xdate\`;
     `;
     const result = await manager.query(query);
-    console.log(result);
     result.forEach((item) => {
       month.push(
         this.getMonth(new Date(item.xdate).getMonth()) +

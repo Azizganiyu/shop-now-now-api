@@ -168,7 +168,6 @@ export class NotificationGeneratorService {
       userId: data.user.id,
     };
 
-    console.log(notification);
     this.notificationQueue.add('notification', notification);
   }
 
