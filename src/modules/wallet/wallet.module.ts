@@ -8,9 +8,13 @@ import { DebitTransaction } from 'src/utilities/transactions/debit-transaction';
 import { ConfigService } from '@nestjs/config';
 import { Wallet } from './entities/wallet.entity';
 import { User } from '../user/entities/user.entity';
+import { Transaction } from '../transaction/entities/transaction.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Wallet, User]), SharedModule],
+  imports: [
+    TypeOrmModule.forFeature([Wallet, User, Transaction]),
+    SharedModule,
+  ],
   providers: [
     WalletService,
     CreditTransaction,
