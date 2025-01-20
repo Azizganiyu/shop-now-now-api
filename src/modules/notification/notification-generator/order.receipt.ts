@@ -8,7 +8,7 @@ export class OrderReceipt {
     order.items.forEach((item) => {
       orderItems += `<tr>
                     <td> 
-                        <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D" alt="image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px; margin-right: 10px;">
+                        <img src="${item.product.image}">
                     </td>
                     <td style="text-align: left; padding: 10px 8px;">
                       <span style="font-size: 14px; color: #555;">${item.product.name}</span>
