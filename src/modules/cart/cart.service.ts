@@ -24,6 +24,7 @@ import { TransactionService } from '../transaction/transaction.service';
 import { Wish } from './entities/wish.entity';
 import { WishItem } from './entities/wish-item.entity';
 import { Product } from '../product/entities/product.entity';
+import { OrderService } from '../order/order.service';
 
 @Injectable()
 export class CartService {
@@ -40,9 +41,8 @@ export class CartService {
     private activityService: ActivityService,
     private helperService: HelperService,
     private paymenService: PaymentService,
-    @InjectRepository(OrderShipment)
-    private readonly shipmentRepository: Repository<OrderShipment>,
     private transactionService: TransactionService,
+    private orderService: OrderService,
   ) {}
 
   async findAll(userId: string) {
@@ -179,6 +179,10 @@ export class CartService {
               stock: newStock < 0 ? 0 : newStock,
             });
           }
+          await this.orderService.changeStatus(
+            order.id,
+            ShipmentStatus.processing,
+          );
         }
 
         await this.deleteCart(user.id);
