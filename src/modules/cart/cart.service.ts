@@ -169,6 +169,7 @@ export class CartService {
             paid: true,
             status: ShipmentStatus.processing,
           });
+          console.log('finished charging wallet 2');
           for (const item of carts) {
             const product = await transactionalEntityManager.findOneBy(
               Product,
@@ -177,14 +178,15 @@ export class CartService {
               },
             );
             const newStock = product.stock - item.quantity;
+
+            console.log('finished charging wallet 3');
             await transactionalEntityManager.update(Product, product.id, {
               stock: newStock < 0 ? 0 : newStock,
             });
+
+            console.log('finished charging wallet 4');
           }
-          await this.orderService.changeStatus(
-            order.id,
-            ShipmentStatus.processing,
-          );
+          this.orderService.changeStatus(order.id, ShipmentStatus.processing);
         }
 
         await this.deleteCart(user.id);
