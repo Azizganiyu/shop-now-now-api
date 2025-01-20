@@ -154,6 +154,7 @@ export class CartService {
             user,
           );
         } else if (checkout.paymentType === PaymentType.WALLET) {
+          console.log('charge wallet');
           const transaction = await this.transactionService.chargeWallet({
             userId: user.id,
             amount: amountToPay,
@@ -161,6 +162,7 @@ export class CartService {
             reference: shipment.reference,
             paymentProvider: PaymentProviders.SNN,
           });
+          console.log('finished charging wallet');
           await transactionalEntityManager.update(OrderShipment, shipment.id, {
             amountPaid: amountToPay,
             paymentRef: transaction.reference,
