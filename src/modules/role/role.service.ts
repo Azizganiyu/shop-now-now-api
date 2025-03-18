@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
 
 @Injectable()
@@ -23,5 +23,9 @@ export class RoleService {
       console.log(error);
       throw new NotFoundException('Unable to find role');
     }
+  }
+
+  async find(tag: string) {
+    return await this.roleRepository.findBy({ tag: tag ?? Not(IsNull()) });
   }
 }

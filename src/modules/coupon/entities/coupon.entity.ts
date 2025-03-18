@@ -28,6 +28,14 @@ export class Coupon {
   @ApiProperty()
   startDate: Date;
 
+  @Column({ nullable: true })
+  @ApiProperty()
+  startTime: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  endTime: string;
+
   @Column()
   @ApiProperty()
   endDate: Date;

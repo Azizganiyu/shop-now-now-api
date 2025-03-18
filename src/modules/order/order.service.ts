@@ -31,12 +31,7 @@ export class OrderService {
     try {
       return await this.orderRepository.findOneOrFail({
         where: [{ id }, { reference: id }],
-        relations: [
-          'shipments',
-          'shipments.location',
-          'items',
-          'items.product',
-        ],
+        relations: ['shipments', 'shipments.lga', 'items', 'items.product'],
       });
     } catch (error) {
       throw new NotFoundException('no order with specified ID found');
@@ -50,7 +45,7 @@ export class OrderService {
       .leftJoinAndSelect('items.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('order.shipments', 'shipments')
-      .leftJoinAndSelect('shipments.location', 'locationo')
+      .leftJoinAndSelect('shipments.lga', 'lga')
       .leftJoinAndSelect('order.user', 'user')
       .andWhere(filter.userId ? `order.userId = :userId` : '1=1', {
         userId: filter.userId,
@@ -72,6 +67,9 @@ export class OrderService {
               })
                 .orWhere('user.lastName like :lastName', {
                   lastName: '%' + filter.search + '%',
+                })
+                .orWhere('order.reference like :reference', {
+                  reference: '%' + filter.search + '%',
                 })
                 .orWhere('user.email like :email', {
                   email: '%' + filter.search + '%',

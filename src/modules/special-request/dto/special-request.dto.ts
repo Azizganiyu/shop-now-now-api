@@ -1,14 +1,23 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDefined, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class SpecialRequestDto {
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
-  request: string;
+  name: string;
 
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
-  comment: string;
+  brand: string;
+
+  @IsOptional()
+  @ApiPropertyOptional()
+  description?: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  quantity: number;
 }

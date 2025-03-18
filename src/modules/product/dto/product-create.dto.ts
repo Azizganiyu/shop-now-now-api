@@ -1,12 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsDefined,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsPositive,
-  IsUrl,
+  ValidateNested,
 } from 'class-validator';
+import { Column } from 'typeorm';
 
 export class CreateProductCategory {
   @ApiProperty()
@@ -17,6 +20,10 @@ export class CreateProductCategory {
   @ApiPropertyOptional()
   @IsOptional()
   description?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  order?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -39,14 +46,29 @@ export class CreateProduct {
   @IsOptional()
   description?: string;
 
+  @ApiProperty()
+  @Column({
+    default: 10,
+    nullable: true,
+  })
+  minOrder: number;
+
+  @ApiProperty()
+  @Column({
+    default: 10,
+    nullable: true,
+  })
+  maxOrder: number;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsPositive()
   @IsNumber()
   sellingPrice?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
   @IsPositive()
   @IsNumber()
   costPrice?: number;
@@ -57,12 +79,14 @@ export class CreateProduct {
   @IsNumber()
   stock?: number;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
   categoryId?: string;
 
-  @ApiPropertyOptional()
-  @IsOptional()
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
   // @IsUrl()
   image?: string;
 
@@ -72,3 +96,52 @@ export class CreateProduct {
 }
 
 export class UpdateProduct extends CreateProduct {}
+
+export enum FeeType {
+  FLAT = 'FLAT',
+  PERCENTAGE = 'PERCENTAGE',
+}
+
+export type BandFees = { name: string; type: FeeType; value: number };
+
+export class CreateProductBand {
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  description?: string;
+
+  @IsArray()
+  @IsOptional()
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  @ApiPropertyOptional({
+    type: 'array',
+    items: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        type: { type: 'string' },
+        value: { type: 'number' },
+      },
+    },
+    default: [],
+  })
+  fees?: BandFees[] = [];
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
+  @IsPositive()
+  minimumOrderAmount: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsPositive()
+  sellingPricePercentage?: number;
+}
+
+export class UpdateProductBand extends CreateProductBand {}

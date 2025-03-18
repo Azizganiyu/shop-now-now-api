@@ -9,5 +9,6 @@ import { AppConfig } from './entities/app-config.entity';
   imports: [SharedModule, TypeOrmModule.forFeature([AppConfig])],
   controllers: [AppConfigController],
   providers: [AppConfigService],
+  exports: [AppConfigService],
 })
 export class AppConfigModule {}

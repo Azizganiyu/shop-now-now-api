@@ -19,7 +19,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
 import {
   InitializePaymentDto,
-  PaymentProviders,
   VerifyPaymentDto,
 } from './dto/payment-initialize.dto';
 import { Userx } from 'src/decorator/userx.decorator';
@@ -35,12 +34,7 @@ import {
   VerifyPaymentResponse,
 } from './responses/payment-response';
 import { ActivityService } from '../activity/activity.service';
-import { PaymentEntity, PaymentStatus } from '../cart/dto/checkout.dto';
-import { TransactionService } from '../transaction/transaction.service';
-import {
-  TransactionPurpose,
-  TransactionStatus,
-} from '../transaction/dto/transaction.dto';
+import { PaymentStatus } from '../cart/dto/checkout.dto';
 import { FindPaymentDto } from './dto/find-payment.dto';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
@@ -49,11 +43,9 @@ import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 @ApiTags('Payment')
 @Controller('payment')
 export class PaymentController {
-  depositFee = 100;
   constructor(
     private paymentService: PaymentService,
     private activityService: ActivityService,
-    private transactionService: TransactionService,
   ) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -95,8 +87,8 @@ export class PaymentController {
   @Roles('user')
   @HttpCode(200)
   @Post('verify')
-  async verifyPayment(@Userx() user: User, @Body() request: VerifyPaymentDto) {
-    const data = await this.paymentService.verify(request, user);
+  async verifyPayment(@Body() request: VerifyPaymentDto) {
+    const data = await this.paymentService.verify(request);
     return {
       status: true,
       message: 'verification successful',
@@ -117,7 +109,7 @@ export class PaymentController {
     };
   }
 
-  @Post('webhook')
+  @Post('webhook/paystack')
   @HttpCode(200)
   @ApiOkResponse()
   async processPaystackPayment(@Req() req: any) {
@@ -144,43 +136,54 @@ export class PaymentController {
       }
 
       if (body.status == PaymentStatus.success) {
+        await this.paymentService.updatePaymentWebhook(
+          payment,
+          amount,
+          reference,
+          fee,
+        );
+      } else if (body.status == PaymentStatus.failed) {
         await this.paymentService.updatePaymentRequestStatus(
           payment.id,
-          PaymentStatus.success,
+          PaymentStatus.failed,
         );
-        if (payment.entity === PaymentEntity.SHIPMENT) {
-          await this.paymentService.markShipmentAsPaid(
-            reference,
-            amount,
-            payment.entityReference,
-          );
-          await this.transactionService.createDepositFromWebhook({
-            amount,
-            fee: this.depositFee,
-            reference,
-            userId: payment.userId,
-            providerFee: fee,
-            status: TransactionStatus.success,
-            currency: 'NGN',
-            paymentProvider: PaymentProviders.PAYSTACK,
-            purpose: TransactionPurpose.order,
-            credit: false,
-          });
-        } else if (payment.entity === PaymentEntity.WALLET) {
-          await this.transactionService.createDepositFromWebhook({
-            amount,
-            fee: this.depositFee,
-            reference,
-            userId: payment.userId,
-            providerFee: fee,
-            status: TransactionStatus.success,
-            currency: 'NGN',
-            paymentProvider: PaymentProviders.PAYSTACK,
-            purpose: TransactionPurpose.deposit,
-            credit: true,
-          });
-        }
-      } else if (body.status == PaymentStatus.failed) {
+      }
+    }
+  }
+
+  @Post('webhook/monnify')
+  @HttpCode(200)
+  @ApiOkResponse()
+  async processMonnifyPayment(@Req() req: any) {
+    await this.activityService.log(req.body);
+    await this.activityService.log(req.headers);
+
+    const event = req.body.eventType;
+    const body = req.body.eventData;
+
+    const amount = body.amountPaid / 100;
+    const fee = 0;
+    const reference = body.transactionReference;
+
+    if (event == 'SUCCESSFUL_TRANSACTION' || event == 'FAILED_TRANSACTION') {
+      const payment =
+        await this.paymentService.findPaymentRequestByReference(reference);
+
+      if (!payment) {
+        this.activityService.log('Payment not found', 'MONNIFY WEBHOOK');
+        throw new NotFoundException(
+          `payment with reference ${reference} not found`,
+        );
+      }
+
+      if (body.paymentStatus == 'PAID') {
+        await this.paymentService.updatePaymentWebhook(
+          payment,
+          amount,
+          reference,
+          fee,
+        );
+      } else {
         await this.paymentService.updatePaymentRequestStatus(
           payment.id,
           PaymentStatus.failed,

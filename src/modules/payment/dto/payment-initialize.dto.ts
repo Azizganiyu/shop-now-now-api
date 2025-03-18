@@ -11,6 +11,7 @@ import { TransactionPurpose } from 'src/modules/transaction/dto/transaction.dto'
 
 export enum PaymentProviders {
   PAYSTACK = 'PAYSTACK',
+  MONNIFY = 'MONNIFY',
   SNN = 'SNN',
 }
 
@@ -24,11 +25,11 @@ export class InitializePaymentDto {
 
   @ApiPropertyOptional({
     enum: PaymentProviders,
-    default: PaymentProviders.PAYSTACK,
+    default: PaymentProviders.MONNIFY,
   })
   @IsOptional()
   @IsEnum(PaymentProviders)
-  paymentProvider: PaymentProviders = PaymentProviders.PAYSTACK;
+  paymentProvider: PaymentProviders = PaymentProviders.MONNIFY;
 
   @ApiProperty()
   @IsDefined()

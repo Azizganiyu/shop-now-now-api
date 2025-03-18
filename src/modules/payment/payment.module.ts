@@ -3,7 +3,6 @@ import { PaymentController } from './payment.controller';
 import { PaymentService } from './payment.service';
 import { SharedModule } from 'src/shared.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PaymentAuth } from './entities/payment-auth.entity';
 import { PaymentRequest } from './entities/payment-request.entity';
 import { OrderShipment } from '../order/entities/order-shipment.entity';
 import { TransactionModule } from '../transaction/transaction.module';
@@ -16,7 +15,6 @@ import { Order } from '../order/entities/order.entity';
     SharedModule,
     TransactionModule,
     TypeOrmModule.forFeature([
-      PaymentAuth,
       PaymentRequest,
       OrderShipment,
       Wallet,

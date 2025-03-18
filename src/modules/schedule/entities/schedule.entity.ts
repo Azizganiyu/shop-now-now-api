@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Location } from 'src/modules/location/entities/location.entity';
+import { ProductBand } from 'src/modules/product/entities/product-band.entity';
 import {
   Column,
   CreateDateColumn,
@@ -42,6 +43,15 @@ export class Schedule {
   @ApiProperty()
   @Column({ nullable: true, default: true })
   status?: boolean;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  bandId?: string;
+
+  @ManyToOne(() => ProductBand, (band) => band.schedules, {
+    eager: true,
+  })
+  band?: ProductBand;
 
   @CreateDateColumn()
   @ApiProperty()

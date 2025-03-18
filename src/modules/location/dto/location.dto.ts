@@ -13,7 +13,7 @@ export class CreateLocationDto {
   @IsDefined()
   @ApiProperty()
   @IsString()
-  name: string;
+  lgaId: string;
 
   @IsNotEmpty()
   @IsDefined()
@@ -27,4 +27,9 @@ export class CreateLocationDto {
   @IsNumber()
   @IsPositive()
   deliveryPrice: number;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  bandId: string;
 }

@@ -13,6 +13,21 @@ const values: Role[] = [
     name: 'Admin',
   },
   {
+    id: 'manager',
+    tag: 'admin',
+    name: 'Manager',
+  },
+  {
+    id: 'supervisor',
+    tag: 'admin',
+    name: 'Supervisor',
+  },
+  {
+    id: 'cashier',
+    tag: 'admin',
+    name: 'Cashier',
+  },
+  {
     id: 'user',
     tag: 'user',
     name: 'User',

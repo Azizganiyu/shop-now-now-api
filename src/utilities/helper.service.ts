@@ -294,4 +294,15 @@ export class HelperService {
       .replace(/[^a-zA-Z0-9 ]/g, '') // Remove all non-alphanumeric characters except spaces
       .replace(/\s+/g, '-'); // Replace spaces with hyphens
   }
+
+  encodeBase64(value) {
+    const buff = Buffer.from(value);
+    return buff.toString('base64');
+  }
+
+  addToDate(date: Date, seconds: number) {
+    const time = new Date(date);
+    time.setSeconds(time.getSeconds() + seconds);
+    return time;
+  }
 }

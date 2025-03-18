@@ -14,10 +14,16 @@ import { User } from '../user/entities/user.entity';
 import { NotificationReadReceipt } from './entities/notification-read-receipt.entity';
 import { ConfigService } from '@nestjs/config';
 import { OrderReceipt } from './notification-generator/order.receipt';
+import { AppConfig } from '../app-config/entities/app-config.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Notification, NotificationReadReceipt, User]),
+    TypeOrmModule.forFeature([
+      Notification,
+      NotificationReadReceipt,
+      User,
+      AppConfig,
+    ]),
     MailModule,
     HttpModule,
     BullModule.forRootAsync({

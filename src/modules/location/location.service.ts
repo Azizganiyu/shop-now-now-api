@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Location } from './entities/location.entity';
@@ -12,15 +12,32 @@ export class LocationService {
   ) {}
 
   async createRequest(createDto: CreateLocationDto): Promise<Location> {
+    const exist = await this.locationRepository.findOneBy({
+      lgaId: createDto.lgaId,
+      bandId: createDto.bandId,
+    });
+    if (exist) {
+      await this.locationRepository.update(exist.id, {
+        deliveryPrice: createDto.deliveryPrice,
+        canDeliver: createDto.canDeliver,
+      });
+      return await this.findOne(exist.id);
+    }
     const request = this.locationRepository.create(createDto);
     return await this.locationRepository.save(request);
   }
 
-  async findAll(includeInactive: any) {
+  async findAll(includeInactive: any, bandId: string) {
+    if (!bandId) {
+      throw new BadGatewayException('bandId is required');
+    }
     return includeInactive
-      ? await this.locationRepository.find({ order: { createdAt: 'DESC' } })
+      ? await this.locationRepository.find({
+          where: { bandId },
+          order: { createdAt: 'DESC' },
+        })
       : await this.locationRepository.find({
-          where: { status: true },
+          where: { status: true, bandId },
           order: { createdAt: 'DESC' },
         });
   }

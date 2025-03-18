@@ -19,6 +19,7 @@ const config: DataSourceOptions | MysqlConnectionOptions = {
   database: process.env.DB_NAME,
   entities: ['dist/src/modules/**/entities/*.entity.js'],
   migrations: ['dist/src/database/migrations/*.js'],
+  // timezone: 'Africa/Lagos',
 };
 
 export const connectionSource = new DataSource(config);

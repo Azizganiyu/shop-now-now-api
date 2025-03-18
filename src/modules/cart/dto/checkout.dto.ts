@@ -1,13 +1,6 @@
 import { Optional } from '@nestjs/common';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsDefined,
-  IsEnum,
-  IsNotEmpty,
-  IsNumber,
-  IsPositive,
-  ValidateIf,
-} from 'class-validator';
+import { IsDefined, IsEnum, IsNotEmpty, ValidateIf } from 'class-validator';
 
 export enum PaymentType {
   WALLET = 'WALLET',
@@ -23,37 +16,10 @@ export enum PaymentStatus {
   success = 'success',
   pending = 'pending',
   failed = 'failed',
+  canceled = 'canceled',
 }
 
 export class CartCheckout {
-  @ApiProperty()
-  @IsPositive()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  amount: number;
-
-  @ApiProperty()
-  @IsPositive()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  amountToPay: number;
-
-  @ApiProperty()
-  @IsPositive()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  deliveryFee: number;
-
-  @ApiProperty()
-  @IsPositive()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  tax: number;
-
   @ApiProperty({
     enum: PaymentType,
     default: PaymentType.CARD,
@@ -64,37 +30,13 @@ export class CartCheckout {
   @IsEnum(PaymentType)
   paymentType?: PaymentType;
 
-  @ApiProperty()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  discount: number;
-
-  @ApiProperty()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  discountValue: number;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  discountType: string;
-
-  @ApiProperty()
-  @IsDefined()
-  @IsNotEmpty()
-  discountValueType: string;
-
   @ApiPropertyOptional()
   @Optional()
   couponCode: string;
 
-  @ApiProperty()
-  @IsNumber()
-  @IsDefined()
-  @IsNotEmpty()
-  pointToCredit: number;
+  @ApiPropertyOptional()
+  @Optional()
+  additionalInfo: string;
 
   @ApiProperty()
   @IsDefined()

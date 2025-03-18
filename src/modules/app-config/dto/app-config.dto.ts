@@ -1,11 +1,16 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from 'class-validator';
+import { AddressDetails } from 'src/modules/address/dto/address-create.dto';
 
 export class CreateConfigDto {
   @ApiPropertyOptional({
@@ -80,4 +85,45 @@ export class CreateConfigDto {
   @IsOptional()
   @IsString()
   discountValueType?: string;
+
+  @ApiProperty({ example: 10.5, description: 'Selling price percentage' })
+  @IsOptional()
+  @IsNumber()
+  sellingPricePercentage?: number;
+
+  @ApiProperty({ example: 8000, description: 'Default delivery price' })
+  @IsOptional()
+  @IsNumber()
+  defaultDeliveryPrice?: number;
+
+  @ApiProperty({ example: ['admin@example.com'], description: 'Admin emails' })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  adminEmails?: string[];
+
+  @ApiPropertyOptional({ type: AddressDetails })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDetails)
+  pickupAddress?: AddressDetails;
+
+  @ApiProperty({ example: 'Warehouse A', description: 'Pickup location name' })
+  @IsOptional()
+  @IsString()
+  pickupName?: string;
+
+  @ApiProperty({ example: 'pickup@example.com', description: 'Pickup email' })
+  @IsOptional()
+  @IsString()
+  pickupEmail?: string;
+
+  @ApiProperty({
+    example: '+2348123456789',
+    description: 'Pickup phone number',
+  })
+  @IsOptional()
+  @IsString()
+  pickupPhone?: string;
 }

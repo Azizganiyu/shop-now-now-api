@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { ProductCategory } from '../entities/product-category.entity';
 import { Product } from '../entities/product.entity';
 import { HelperService } from 'src/utilities/helper.service';
@@ -35,9 +35,14 @@ export class ProductCategoryService {
     return includeInactive
       ? await this.categoryRepository
           .createQueryBuilder('category')
+          .leftJoinAndSelect('category.band', 'band')
           .loadRelationCountAndMap('category.productCount', 'category.products')
+          .orderBy('category.order', 'ASC')
           .getMany()
-      : await this.categoryRepository.findBy({ status: true });
+      : await this.categoryRepository.find({
+          where: { status: true },
+          order: { order: 'ASC' },
+        });
   }
 
   /**
@@ -60,7 +65,33 @@ export class ProductCategoryService {
   async create(category: CreateProductCategory) {
     const id = this.helperService.idFromName(category.name);
     await this.checkTaken(id);
-    const create = await this.categoryRepository.create({ id, ...category });
+
+    let newOrder;
+    let lastOrder = 0;
+    const categories = await this.categoryRepository.find({
+      order: { order: 'DESC' },
+    });
+    if (categories.length > 0) {
+      lastOrder = categories[0].order;
+    }
+    if (category.order) {
+      newOrder = category.order;
+      const orderExist = await this.categoryRepository.findOneBy({
+        order: category.order,
+      });
+      if (orderExist) {
+        await this.categoryRepository.update(orderExist.id, {
+          order: lastOrder + 1,
+        });
+      }
+    } else {
+      newOrder = lastOrder + 1;
+    }
+    const create = await this.categoryRepository.create({
+      id,
+      ...category,
+      order: newOrder,
+    });
     return await this.categoryRepository.save(create);
   }
 
@@ -85,7 +116,27 @@ export class ProductCategoryService {
    * @returns Updated category object.
    */
   async update(id: string, category: UpdateProductCategory) {
-    await this.categoryRepository.update(id, category);
+    let newOrder;
+    let lastOrder = 0;
+    const categories = await this.categoryRepository.find({
+      order: { order: 'DESC' },
+    });
+    lastOrder = categories[0].order;
+    if (category.order) {
+      newOrder = category.order;
+      const orderExist = await this.categoryRepository.findOneBy({
+        order: category.order,
+        id: Not(id),
+      });
+      if (orderExist) {
+        await this.categoryRepository.update(orderExist.id, {
+          order: lastOrder + 1,
+        });
+      }
+    } else {
+      newOrder = lastOrder + 1;
+    }
+    await this.categoryRepository.update(id, { ...category, order: newOrder });
     return await this.findOne(id);
   }
 

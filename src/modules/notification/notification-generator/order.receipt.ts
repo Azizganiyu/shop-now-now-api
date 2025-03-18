@@ -18,6 +18,13 @@ export class OrderReceipt {
                     <td style="text-align: left; padding: 10px 8px; font-size: 14px; color: #555;">₦${this.formatAccounting(item.product.sellingPrice * item.quantity)}</td>
                   </tr>`;
     });
+
+    let fees = '';
+    Object.entries(order.shipments[0].fees).forEach(([key, value]) => {
+      console.log(`Key: ${key}, Value: ${value}`);
+      fees += `<p style="font-size: 14px; font-weight: bold; color: #232f3e;">${key}: <span style="font-size: 14px;">₦${this.formatAccounting(value)}</span></p>`;
+    });
+
     return `<table style="width: 100%;">
     <tr>
       <td style="text-align: center;">
@@ -29,7 +36,7 @@ export class OrderReceipt {
                 <h2 style="font-size: 18px; margin-bottom: 10px;">Order Summary</h2>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Order Number: <strong>#${order.reference}</strong></p>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Order Date: <strong>${this.getDate(order.createdAt)}</strong></p>
-                <p style="font-size: 14px; color: #555; margin: 5px 0;">Delivery Address: <strong>${order.shipments[0].address}, ${order.shipments[0].location.name}</strong></p>
+                <p style="font-size: 14px; color: #555; margin: 5px 0;">Delivery Address: <strong>${order.shipments[0].address}, ${order.shipments[0].lga.name}</strong></p>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Expected Delivery Date: <strong>${this.getDate(order.shipments[0].expectedDeliveryDate)}</strong></p>
               </div>
               <h3 style="font-size: 18px; margin-top: 30px;">Your Order Items</h3>
@@ -49,8 +56,8 @@ export class OrderReceipt {
               </table>
               <div style="text-align: right; margin-top: 20px;">
                 <p style="font-size: 14px; font-weight: bold; color: #232f3e;">Subtotal: <span style="font-size: 14px;">₦${this.formatAccounting(order.shipments[0].amount)}</span></p>
+                ${fees}
                 <p style="font-size: 14px; font-weight: bold; color: #232f3e;">Delivery Fee: <span style="font-size: 14px;">₦${this.formatAccounting(order.shipments[0].deliveryFee)}</span></p>
-                <p style="font-size: 14px; font-weight: bold; color: #232f3e;">Tax: <span style="font-size: 14px;">₦${this.formatAccounting(order.shipments[0].tax)}</span></p>
                 <p style="font-size: 14px; font-weight: bold; color: #232f3e;">Discount: <span style="font-size: 14px;">- ₦${this.formatAccounting(order.shipments[0].discount)}</span></p>
                 <p style="font-size: 18px; font-weight: bold; color: #232f3e;">Total: <span style="font-size: 18px; color: #d9534f;">₦${this.formatAccounting(order.shipments[0].amountToPay)}</span></p>
               </div>

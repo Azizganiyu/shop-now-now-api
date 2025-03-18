@@ -8,6 +8,7 @@ import { User } from '../user/entities/user.entity';
 import { Order } from '../order/entities/order.entity';
 import { Product } from '../product/entities/product.entity';
 import { ProductCategory } from '../product/entities/product-category.entity';
+import { OrderItem } from '../order/entities/order-item.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ProductCategory } from '../product/entities/product-category.entity';
       Order,
       Product,
       ProductCategory,
+      OrderItem,
     ]),
   ],
   providers: [OverviewService],

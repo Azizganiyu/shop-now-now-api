@@ -11,7 +11,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
 import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
 import { Exclude } from 'class-transformer';
-import { Location } from 'src/modules/location/entities/location.entity';
+import { LGA } from 'src/modules/location/entities/lga.entity';
 
 @Entity()
 export class Address {
@@ -41,16 +41,25 @@ export class Address {
   @ManyToOne(() => User, (user) => user.addresses)
   user?: User;
 
-  @Column()
+  @Column({ nullable: true })
   @ApiProperty()
-  locationId: string;
+  lgaId?: string;
 
-  @ManyToOne(() => Location, (location) => location.addresses)
-  location?: Location;
+  @ManyToOne(() => LGA, (lga) => lga.addresses, {
+    eager: true,
+  })
+  lga?: LGA;
 
-  @Column()
-  @ApiProperty()
-  address: string;
+  @Column({ type: 'json', nullable: true }) // Change to JSON type
+  @ApiProperty({
+    example: {
+      description: '180 Freedom Way, Lagos, Nigeria',
+      lat: 6.4519949,
+      lng: 3.4823186,
+    },
+    type: 'object',
+  })
+  address: { description: string; lat: number; lng: number };
 
   @OneToMany(() => OrderShipment, (item) => item.address)
   @Exclude()

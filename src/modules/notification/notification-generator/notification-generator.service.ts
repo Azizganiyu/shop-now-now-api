@@ -8,6 +8,9 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { OrderReceipt } from './order.receipt';
 import { Order } from 'src/modules/order/entities/order.entity';
 import { ShipmentStatus } from 'src/modules/order/dto/order.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AppConfig } from 'src/modules/app-config/entities/app-config.entity';
+import { IsNull, Not, Repository } from 'typeorm';
 
 export interface NotificationGeneratorDto {
   userId?: string;
@@ -20,6 +23,8 @@ export class NotificationGeneratorService {
     @InjectQueue(process.env.BULL_NOTIFICATION_QUEUE)
     private readonly notificationQueue: Queue,
     private orderReceipt: OrderReceipt,
+    @InjectRepository(AppConfig)
+    private appConfigRepository: Repository<AppConfig>,
   ) {}
 
   get preference() {
@@ -155,7 +160,7 @@ export class NotificationGeneratorService {
     channel: any[];
   }) {
     const image = data.attachment
-      ? `<span>${data.attachment.name} | ${data.attachment.size / 1000000}mb</span> <br/> <img width="300" src="${data.attachment.url}" />`
+      ? `<img width="300" src="${data.attachment.url}" />`
       : '';
     const mail: EmailNotification = {
       subject: data.subject,
@@ -171,12 +176,37 @@ export class NotificationGeneratorService {
     this.notificationQueue.add('notification', notification);
   }
 
+  async notifyAdminNewOrder(order: Order) {
+    const config = await this.appConfigRepository.findOneBy({
+      id: Not(IsNull()),
+    });
+    const subject = 'New Order!';
+    const info =
+      'A new order has been creeated and requires processing, please log into the dashboard to view order';
+    const message = this.orderReceipt.generateProcessing(info, order);
+    for (const email of config.adminEmails) {
+      const mail: EmailNotification = {
+        subject,
+        message,
+        emailAddress: email,
+        fullName: 'Admin',
+        preference: this.preference,
+      };
+      const notification: NotificationDto = {
+        message: { mail },
+        channels: ['email'],
+      };
+      this.notificationQueue.add('notification', notification);
+    }
+  }
+
   async sendOrderUpdate(order: Order) {
     let info = '';
     let subject = '';
 
     switch (order.shipments[0].status) {
       case ShipmentStatus.processing:
+        this.notifyAdminNewOrder(order);
         subject = 'Order Confirmation';
         info =
           'Thank you for shopping with us. Your order has been confirmed and is now being processed.';

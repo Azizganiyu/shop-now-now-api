@@ -9,14 +9,19 @@ import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
 import { PageDto } from 'src/utilities/pagination/page.dto';
 import { FindProductDto } from '../dto/find-product.dto';
+import { AppConfigService } from 'src/modules/app-config/app-config.service';
+import { ProductCategory } from '../entities/product-category.entity';
 
 @Injectable()
 export class ProductService {
   constructor(
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(ProductCategory)
+    private readonly categoryRepository: Repository<ProductCategory>,
     private requestContext: RequestContextService,
     private helperService: HelperService,
+    private appConfigService: AppConfigService,
   ) {}
 
   /**
@@ -31,6 +36,7 @@ export class ProductService {
     const products = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
+      .leftJoinAndSelect('category.band', 'band')
       .andWhere(
         !filter.admin || filter.admin != 'true'
           ? `product.status = :status`
@@ -125,8 +131,19 @@ export class ProductService {
    * @throws BadRequestException if the product name is already taken.
    */
   async create(product: CreateProduct) {
+    const category = await this.categoryRepository.findOne({
+      where: { id: product.categoryId },
+      relations: ['band'],
+    });
     const id = product.sku ?? this.helperService.idFromName(product.name);
     await this.checkTaken(id);
+    if (!product.sellingPrice) {
+      const appConfig = await this.appConfigService.getConfig();
+      const percentage =
+        category.band.sellingPricePercentage ??
+        appConfig.sellingPricePercentage;
+      product.sellingPrice = (percentage / 100) * product.costPrice;
+    }
     const create = await this.productRepository.create({
       id,
       ...product,
@@ -155,6 +172,17 @@ export class ProductService {
    * @returns Updated product object.
    */
   async update(id: string, product: UpdateProduct) {
+    const category = await this.categoryRepository.findOne({
+      where: { id: product.categoryId },
+      relations: ['band'],
+    });
+    if (!product.sellingPrice) {
+      const appConfig = await this.appConfigService.getConfig();
+      const percentage =
+        category.band.sellingPricePercentage ??
+        appConfig.sellingPricePercentage;
+      product.sellingPrice = (percentage / 100) * product.costPrice;
+    }
     await this.productRepository.update(id, product);
     return await this.findOne(id);
   }

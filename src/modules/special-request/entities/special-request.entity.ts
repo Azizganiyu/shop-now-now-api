@@ -14,13 +14,21 @@ export class SpecialRequest {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ type: 'text' })
+  @Column()
   @ApiProperty()
-  request: string;
+  name: string;
 
-  @Column({ type: 'text' })
+  @Column()
   @ApiProperty()
-  comment: string;
+  brand: string;
+
+  @Column({ type: 'text', nullable: true })
+  @ApiProperty()
+  description?: string;
+
+  @Column()
+  @ApiProperty()
+  quantity: number;
 
   @Column()
   @ApiProperty()

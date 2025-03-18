@@ -22,7 +22,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { ScheduleDto } from './dto/schedule.dto';
+import { GetSlotDto, ScheduleDto } from './dto/schedule.dto';
 import { ScheduleService } from './schedule.service';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 
@@ -46,11 +46,26 @@ export class ScheduleController {
     };
   }
 
+  @ApiCreatedResponse()
+  @HttpCode(201)
+  @Post('get-slots')
+  async getSlots(@Body() request: GetSlotDto) {
+    const data = await this.scheduleService.getSlots(request);
+    return {
+      status: true,
+      message: 'slots retreived successfully',
+      data,
+    };
+  }
+
   @ApiOkResponse()
   @HttpCode(200)
   @Get()
-  async findAll(@Query() pageOptionsdto: PageOptionsDto) {
-    const data = await this.scheduleService.findAll(pageOptionsdto);
+  async findAll(
+    @Query() pageOptionsdto: PageOptionsDto,
+    @Query('bandId') bandId: string,
+  ) {
+    const data = await this.scheduleService.findAll(pageOptionsdto, bandId);
     return {
       status: true,
       message: 'schedules retreived',

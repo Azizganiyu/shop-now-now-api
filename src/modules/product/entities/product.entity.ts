@@ -41,6 +41,14 @@ export class Product {
 
   @Column({ nullable: true })
   @ApiProperty()
+  minOrder?: number;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  maxOrder?: number;
+
+  @Column({ nullable: true })
+  @ApiProperty()
   categoryId?: string;
 
   @ManyToOne(() => ProductCategory, (category) => category.products, {

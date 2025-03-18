@@ -7,10 +7,22 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from 'src/shared.module';
 import { Product } from './entities/product.entity';
 import { ProductCategory } from './entities/product-category.entity';
+import { ProductBandController } from './product-controllers/product-band.controller';
+import { ProductBandService } from './product-services/band.service';
+import { ProductBand } from './entities/product-band.entity';
+import { AppConfigModule } from '../app-config/app-config.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, ProductCategory]), SharedModule],
-  controllers: [ProductController, ProductCategoryController],
-  providers: [ProductService, ProductCategoryService],
+  imports: [
+    TypeOrmModule.forFeature([Product, ProductCategory, ProductBand]),
+    SharedModule,
+    AppConfigModule,
+  ],
+  controllers: [
+    ProductController,
+    ProductCategoryController,
+    ProductBandController,
+  ],
+  providers: [ProductService, ProductCategoryService, ProductBandService],
 })
 export class ProductModule {}

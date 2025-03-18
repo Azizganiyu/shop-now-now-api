@@ -10,6 +10,7 @@ import { UserRole } from '../user/dto/user.dto';
 import { ProductCategory } from '../product/entities/product-category.entity';
 import { Product } from '../product/entities/product.entity';
 import { RoleTag } from 'src/constants/roletag';
+import { OrderItem } from '../order/entities/order-item.entity';
 
 @Injectable()
 export class OverviewService {
@@ -24,6 +25,8 @@ export class OverviewService {
     private readonly categoryRepository: Repository<ProductCategory>,
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepository: Repository<OrderItem>,
     private dataSource: DataSource,
   ) {}
 
@@ -69,6 +72,9 @@ export class OverviewService {
       },
       chart: await this.getChartData(),
       recentOrders: await this.findRecentOrders(),
+      topSellingProduct: await this.topSellingProduct(),
+      topOrderingCustomers: await this.topOrderingCustomers(),
+      topPayingCustomers: await this.topPayingCustomers(),
     };
   }
 
@@ -138,10 +144,66 @@ export class OverviewService {
       .leftJoinAndSelect('items.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('order.shipments', 'shipments')
-      .leftJoinAndSelect('shipments.location', 'locationo')
       .leftJoinAndSelect('order.user', 'user')
       .orderBy('order.createdAt', 'DESC')
       .take(5)
       .getMany();
+  }
+
+  async topSellingProduct() {
+    return await this.orderItemRepository
+      .createQueryBuilder('orderItem')
+      .innerJoin('orderItem.order', 'order')
+      .innerJoin('order.shipments', 'shipments')
+      .innerJoin('orderItem.product', 'product')
+      .where('shipments.paid = :paid', { paid: true })
+      .select([
+        'orderItem.productId AS productId',
+        'product.name AS productName',
+        'product.image AS productImage',
+        'SUM(orderItem.quantity) AS totalQuantitySold',
+      ])
+      .groupBy('orderItem.productId, product.name, product.image')
+      .orderBy('totalQuantitySold', 'DESC')
+      .limit(10)
+      .getRawMany();
+  }
+
+  async topOrderingCustomers() {
+    return await this.orderRepository
+      .createQueryBuilder('order')
+      .innerJoin('order.shipments', 'shipments')
+      .innerJoin('order.user', 'user')
+      .where('shipments.paid = :paid', { paid: true })
+      .select([
+        'order.userId AS userId',
+        'user.firstName AS firstName',
+        'user.lastName AS lastName',
+        'user.email AS email',
+        'COUNT(order.id) AS totalOrders',
+      ])
+      .groupBy('order.userId, user.firstName, user.lastName, user.email')
+      .orderBy('totalOrders', 'DESC')
+      .limit(10)
+      .getRawMany();
+  }
+
+  async topPayingCustomers() {
+    return await this.orderRepository
+      .createQueryBuilder('order')
+      .innerJoin('order.shipments', 'shipments')
+      .innerJoin('order.user', 'user')
+      .where('shipments.paid = :paid', { paid: true })
+      .select([
+        'order.userId AS userId',
+        'user.firstName AS firstName',
+        'user.lastName AS lastName',
+        'user.email AS email',
+        'SUM(shipments.amountToPay) AS totalAmountPaid',
+      ])
+      .groupBy('order.userId, user.firstName, user.lastName, user.email')
+      .orderBy('totalAmountPaid', 'DESC')
+      .limit(10)
+      .getRawMany();
   }
 }

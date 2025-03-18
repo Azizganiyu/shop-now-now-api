@@ -50,4 +50,39 @@ export class AppConfig {
   @Column({ nullable: true })
   @ApiProperty()
   discountValueType?: string;
+
+  @Column({ type: 'double', nullable: true, default: 10.5 })
+  @ApiProperty()
+  sellingPricePercentage?: number;
+
+  @Column({ type: 'double', nullable: true, default: 8000 })
+  @ApiProperty()
+  defaultDeliveryPrice?: number;
+
+  @ApiProperty()
+  @Column({ type: 'json', nullable: true })
+  adminEmails?: string[];
+
+  @Column({ type: 'json', nullable: true }) // Change to JSON type
+  @ApiProperty({
+    example: {
+      description: '180 Freedom Way, Lagos, Nigeria',
+      lat: 6.4519949,
+      lng: 3.4823186,
+    },
+    type: 'object',
+  })
+  pickupAddress?: { description: string; lat: number; lng: number };
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  pickupName?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  pickupEmail?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  pickupPhone?: string;
 }

@@ -50,7 +50,6 @@ export class CouponService {
     } else if (now.getTime() < xstartDate.getTime()) {
       throw new BadRequestException('Coupon not available yet');
     }
-
     return coupon;
   }
 

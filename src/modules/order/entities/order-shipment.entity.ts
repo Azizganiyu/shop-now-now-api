@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Order } from './order.entity';
 import { ShipmentStatus } from '../dto/order.dto';
-import { Location } from 'src/modules/location/entities/location.entity';
+import { LGA } from 'src/modules/location/entities/lga.entity';
+import { DeliveryItem } from 'src/modules/delivery/entities/delivery-item.entity';
 
 @Entity()
 export class OrderShipment {
@@ -34,14 +36,21 @@ export class OrderShipment {
 
   @Column()
   @ApiProperty()
-  locationId: string;
+  lgaId: string;
 
-  @ManyToOne(() => Location, (location) => location.shipments)
-  location?: Location;
+  @ManyToOne(() => LGA, (lga) => lga.shipments)
+  lga?: LGA;
 
-  @Column()
-  @ApiProperty()
-  address: string;
+  @Column({ type: 'json', nullable: true }) // Change to JSON type
+  @ApiProperty({
+    example: {
+      description: '180 Freedom Way, Lagos, Nigeria',
+      lat: 6.4519949,
+      lng: 3.4823186,
+    },
+    type: 'object',
+  })
+  address: { description: string; lat: number; lng: number };
 
   @ApiProperty()
   @Column({
@@ -94,6 +103,14 @@ export class OrderShipment {
   @Column({ nullable: true })
   @ApiProperty()
   couponCode?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  @ApiProperty()
+  additionalInfo?: string;
+
+  @ApiProperty()
+  @Column({ type: 'json', nullable: true })
+  fees?: Record<string, number>;
 
   @ApiProperty()
   @Column({
@@ -161,6 +178,9 @@ export class OrderShipment {
   @Column()
   @ApiProperty()
   expectedDeliveryDate: Date;
+
+  @OneToMany(() => DeliveryItem, (delivery) => delivery.shipment)
+  deliveries?: DeliveryItem[];
 
   @CreateDateColumn()
   @ApiProperty()

@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Address } from 'src/modules/address/entities/address.entity';
-import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
+import { ProductBand } from 'src/modules/product/entities/product-band.entity';
 import { Schedule } from 'src/modules/schedule/entities/schedule.entity';
 import {
   Entity,
@@ -8,17 +7,15 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  ManyToOne,
 } from 'typeorm';
+import { LGA } from './lga.entity';
 
 @Entity()
 export class Location {
   @PrimaryGeneratedColumn('uuid')
   @ApiProperty()
   id?: string;
-
-  @Column()
-  @ApiProperty()
-  name: string;
 
   @Column({ default: true })
   @ApiProperty()
@@ -28,15 +25,27 @@ export class Location {
   @Column({ type: 'double', scale: 2, precision: 20, nullable: true })
   deliveryPrice: number;
 
-  @OneToMany(() => OrderShipment, (item) => item.location)
-  shipments?: OrderShipment[];
-
-  @OneToMany(() => Address, (item) => item.location)
-  addresses?: Address[];
-
   @ApiProperty()
   @Column({ default: true })
   status?: boolean;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  bandId?: string;
+
+  @ManyToOne(() => ProductBand, (band) => band.locations, {
+    eager: true,
+  })
+  band?: ProductBand;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  lgaId?: string;
+
+  @ManyToOne(() => LGA, (lga) => lga.locations, {
+    eager: true,
+  })
+  lga?: LGA;
 
   @OneToMany(() => Schedule, (schedule) => schedule.location)
   schedules?: Schedule[];

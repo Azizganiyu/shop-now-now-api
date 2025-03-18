@@ -49,6 +49,10 @@ import { ScheduleModule } from './modules/schedule/schedule.module';
 import { AppConfigModule } from './modules/app-config/app-config.module';
 import { BannerModule } from './modules/banner/banner.module';
 import { OverviewModule } from './modules/overview/overview.module';
+import { DeliveryModule } from './modules/delivery/delivery.module';
+import monnifyConfig from './configs/monnify.config';
+import googleConfig from './configs/google.config';
+import gokadaConfig from './configs/gokada.config';
 
 @Module({
   imports: [
@@ -77,6 +81,9 @@ import { OverviewModule } from './modules/overview/overview.module';
         mailConfig,
         redisConfig,
         paystackConfig,
+        monnifyConfig,
+        googleConfig,
+        gokadaConfig,
       ],
       expandVariables: true,
       validate,
@@ -108,6 +115,7 @@ import { OverviewModule } from './modules/overview/overview.module';
     AppConfigModule,
     BannerModule,
     OverviewModule,
+    DeliveryModule,
   ],
   controllers: [AppController],
   providers: [

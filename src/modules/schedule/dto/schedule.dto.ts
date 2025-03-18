@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsDefined,
   IsNotEmpty,
   IsNumber,
@@ -36,6 +37,29 @@ export class ScheduleDto {
 
   @IsOptional()
   @ApiPropertyOptional()
-  @ApiProperty()
   locationId: string;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  bandId: string;
+}
+
+export class GetSlotDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @MaxLength(199)
+  date: Date;
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @IsArray()
+  bands: string[];
+
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  lgaId: string;
 }

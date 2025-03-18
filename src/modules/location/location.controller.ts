@@ -50,8 +50,11 @@ export class LocationController {
   @ApiOkResponse()
   @HttpCode(200)
   @Get()
-  async findAll(@Query('includeInactive') includeInactive: number) {
-    const data = await this.locationService.findAll(includeInactive);
+  async findAll(
+    @Query('includeInactive') includeInactive: number,
+    @Query('bandId') bandId: string,
+  ) {
+    const data = await this.locationService.findAll(includeInactive, bandId);
     return {
       status: true,
       message: 'success',

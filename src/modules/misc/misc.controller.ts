@@ -6,6 +6,7 @@ import {
   HttpCode,
   Param,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -16,6 +17,7 @@ import {
   ApiConsumes,
   ApiOkResponse,
   ApiParam,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import csc from 'countries-states-cities';
@@ -38,6 +40,8 @@ import { Repository } from 'typeorm';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from '../user/dto/user.dto';
+import { LGA } from '../location/entities/lga.entity';
+import { MiscService } from './misc.service';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Others')
@@ -48,6 +52,8 @@ export class MiscController {
     private configService: ConfigService,
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
+    @InjectRepository(LGA) private lgaRepository: Repository<LGA>,
+    private miscService: MiscService,
   ) {}
 
   /**
@@ -105,6 +111,17 @@ export class MiscController {
       status: true,
       message: 'success',
       data: csc.getCitiesOfState(Number(id)),
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('lgas')
+  async getLgas() {
+    return {
+      status: true,
+      message: 'success',
+      data: await this.lgaRepository.find(),
     };
   }
 
@@ -184,6 +201,21 @@ export class MiscController {
     return {
       status: true,
       message: 'success',
+    };
+  }
+
+  @ApiOkResponse({ status: 200, type: CityResponseDto })
+  @HttpCode(200)
+  @ApiQuery({
+    name: 'key',
+    description: 'search parameter',
+  })
+  @Get('location/search')
+  async searchLocation(@Query('key') search: string) {
+    return {
+      status: true,
+      message: 'success',
+      data: await this.miscService.searchLocation(search),
     };
   }
 }

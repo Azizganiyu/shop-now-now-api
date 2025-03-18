@@ -5,9 +5,11 @@ import {
   OneToMany,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { Product } from './product.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { ProductBand } from './product-band.entity';
 
 @Entity()
 export class ProductCategory {
@@ -16,6 +18,9 @@ export class ProductCategory {
 
   @Column()
   name: string;
+
+  @Column({ nullable: true, default: 1 })
+  order: number;
 
   @Column({ nullable: true })
   imageUrl?: string;
@@ -28,6 +33,15 @@ export class ProductCategory {
 
   @OneToMany(() => Product, (product) => product.category)
   products?: Product[];
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  bandId?: string;
+
+  @ManyToOne(() => ProductBand, (band) => band.categories, {
+    eager: true,
+  })
+  band?: ProductBand;
 
   @ApiProperty()
   @Column({ default: true })

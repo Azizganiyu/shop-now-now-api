@@ -9,6 +9,7 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/modules/user/entities/user.entity';
 import { PaymentStatus } from 'src/modules/cart/dto/checkout.dto';
+import { PaymentProviders } from '../dto/payment-initialize.dto';
 
 @Entity()
 export class PaymentRequest {
@@ -34,6 +35,10 @@ export class PaymentRequest {
   @Column()
   @ApiProperty()
   email: string;
+
+  @Column({ default: PaymentProviders.PAYSTACK })
+  @ApiProperty()
+  provider: string;
 
   @Column()
   @ApiProperty()

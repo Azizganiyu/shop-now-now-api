@@ -24,4 +24,22 @@ export class RedisCacheService {
   async get(key: string) {
     return await this.cache.get(key);
   }
+
+  async setTransactionProcessing(transactionReference: string, ttl = 180000) {
+    return await this.cache.set(
+      `processing_${transactionReference}`,
+      `processing_${transactionReference}`,
+      ttl,
+    );
+  }
+
+  async checkTransactionProcessing(transactionReference: string) {
+    return await this.cache
+      .get(`processing_${transactionReference}`)
+      .then(async (data) => {
+        if (data)
+          //  checklog
+          return data ? true : false;
+      });
+  }
 }

@@ -1,6 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDefined, IsNotEmpty } from 'class-validator';
+import { Type } from 'class-transformer';
+import {
+  IsDefined,
+  IsNotEmpty,
+  IsObject,
+  ValidateNested,
+} from 'class-validator';
 
+export class AddressDetails {
+  @ApiProperty({ example: '180 Freedom Way, Lagos, Nigeria' })
+  @IsNotEmpty()
+  description: string;
+
+  @ApiProperty({ example: 6.4519949 })
+  @IsDefined()
+  @IsNotEmpty()
+  lat: number;
+
+  @ApiProperty({ example: 3.4823186 })
+  @IsNotEmpty()
+  @IsDefined()
+  lng: number;
+}
 export class CreateAddress {
   @ApiProperty()
   @IsDefined()
@@ -22,15 +43,18 @@ export class CreateAddress {
   @IsNotEmpty()
   phone: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: AddressDetails })
   @IsDefined()
   @IsNotEmpty()
-  address: string;
+  @IsObject()
+  @ValidateNested()
+  @Type(() => AddressDetails)
+  address: AddressDetails;
 
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
-  locationId: string;
+  lgaId: string;
 }
 
 export class UpdateAddress extends CreateAddress {}

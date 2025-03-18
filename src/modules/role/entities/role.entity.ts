@@ -24,6 +24,10 @@ export class Role {
   @Column({ length: 199 })
   tag: string;
 
+  @ApiProperty()
+  @Column({ type: 'json', nullable: true })
+  permissions?: string[];
+
   @OneToMany(() => User, (user) => user.role)
   users?: User[];
 

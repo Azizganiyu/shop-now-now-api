@@ -7,35 +7,27 @@ import {
   ManyToOne,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/modules/user/entities/user.entity';
+import { Delivery } from './delivery.entity';
+import { OrderShipment } from 'src/modules/order/entities/order-shipment.entity';
 
 @Entity()
-export class PaymentAuth {
+export class DeliveryItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
   @ApiProperty()
-  userId: string;
+  deliveryId: string;
 
-  @ManyToOne(() => User, (user) => user.carts)
-  user?: User;
-
-  @Column({ type: 'text' })
-  @ApiProperty()
-  auth: string;
+  @ManyToOne(() => Delivery, (delivery) => delivery.items)
+  delivery?: Delivery;
 
   @Column()
   @ApiProperty()
-  email: string;
+  shipmentId: string;
 
-  @Column()
-  @ApiProperty()
-  provider: string;
-
-  @Column({ type: 'text' })
-  @ApiProperty()
-  description: string;
+  @ManyToOne(() => OrderShipment, (shipment) => shipment.deliveries)
+  shipment?: OrderShipment;
 
   @CreateDateColumn()
   @ApiProperty()

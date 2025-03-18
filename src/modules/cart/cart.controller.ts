@@ -111,6 +111,18 @@ export class CartController {
     };
   }
 
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('checkout/settings')
+  async getFees(@Userx() user: User) {
+    const data = await this.cartService.checkoutSettings(user);
+    return {
+      status: true,
+      message: 'success',
+      data,
+    };
+  }
+
   @ApiOkResponse({ type: ApiResponseDto })
   @HttpCode(200)
   @Post('wishlist')

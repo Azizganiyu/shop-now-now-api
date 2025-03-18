@@ -25,6 +25,11 @@ import { Wish } from './entities/wish.entity';
 import { WishItem } from './entities/wish-item.entity';
 import { Product } from '../product/entities/product.entity';
 import { OrderService } from '../order/order.service';
+import { FeeType } from '../product/dto/product-create.dto';
+import { ProductBand } from '../product/entities/product-band.entity';
+import { AppConfigService } from '../app-config/app-config.service';
+import { Location } from '../location/entities/location.entity';
+import { CouponService } from '../coupon/coupon.service';
 
 @Injectable()
 export class CartService {
@@ -38,11 +43,15 @@ export class CartService {
     @InjectRepository(Address)
     private readonly addressRepository: Repository<Address>,
     @InjectEntityManager() private readonly entityManager: EntityManager,
+    @InjectRepository(Location)
+    private locationRepository: Repository<Location>,
     private activityService: ActivityService,
     private helperService: HelperService,
     private paymenService: PaymentService,
     private transactionService: TransactionService,
     private orderService: OrderService,
+    private appConfigService: AppConfigService,
+    private couponService: CouponService,
   ) {}
 
   async findAll(userId: string) {
@@ -78,22 +87,31 @@ export class CartService {
   }
 
   async checkout(checkout: CartCheckout, user: User) {
+    const checkoutSetting = await this.checkoutSettings(user);
     const address = await this.addressRepository.findOneBy({
       userId: user.id,
     });
-    const carts = await this.cartRepository.find({
-      where: { userId: user.id },
-      relations: ['product'],
-    });
-    if (carts.length === 0) {
+
+    if (checkoutSetting.carts.length === 0) {
       throw new BadRequestException('no item found in cart');
     }
 
-    const amount = carts.reduce((sum, cart) => {
-      return sum + cart.product.sellingPrice * cart.quantity;
-    }, 0);
+    let couponDiscount: number = 0;
+    if (checkout.couponCode && checkoutSetting.discount.discount === 0) {
+      const coupon = await this.couponService.findCoupon(checkout.couponCode);
+      if (coupon && coupon.value > 0) {
+        couponDiscount = this.calculateFee(checkoutSetting.amountToPay, {
+          value: coupon.value,
+          type: coupon.valueType as FeeType,
+        });
+      }
+      checkoutSetting.discount.discount = couponDiscount;
+      checkoutSetting.discount.discountValueType = coupon.valueType as FeeType;
+      checkoutSetting.discount.discountValue = coupon.value;
+      checkoutSetting.discount.discountType = 'COUPON';
+    }
 
-    const amountToPay = checkout.amountToPay;
+    const amountToPay = checkoutSetting.amountToPay - couponDiscount;
 
     return await this.entityManager.transaction(
       async (transactionalEntityManager) => {
@@ -104,7 +122,7 @@ export class CartService {
           paymentType: checkout.paymentType,
         });
         let order = await transactionalEntityManager.save(Order, createOrder);
-        for (const item of carts) {
+        for (const item of checkoutSetting.carts) {
           const createItem = transactionalEntityManager.create(OrderItem, {
             productId: item.productId,
             orderId: order.id,
@@ -120,20 +138,21 @@ export class CartService {
             email: address.email,
             phone: address.phone,
             address: address.address,
-            locationId: address.locationId,
-            amount,
+            lgaId: address.lgaId,
+            amount: checkoutSetting.subTotal,
             amountToPay,
-            tax: checkout.tax,
-            discount: checkout.discount,
-            discountType: checkout.discountType,
-            discountValue: checkout.discountValue,
-            discountValueType: checkout.discountValueType,
+            fees: checkoutSetting.fees,
+            discount: checkoutSetting.discount.discount,
+            discountType: checkoutSetting.discount.discountType,
+            discountValue: checkoutSetting.discount.discountValue,
+            discountValueType: checkoutSetting.discount.discountValueType,
             couponCode: checkout.couponCode,
-            deliveryFee: checkout.deliveryFee,
-            pointToCredit: checkout.pointToCredit,
+            deliveryFee: checkoutSetting.deliveryPrice,
+            pointToCredit: checkoutSetting.pointToCredit,
             orderId: order.id,
             reference: 'INV' + this.helperService.generateRandomAlphaNum(8),
             expectedDeliveryDate: checkout.expectedDeliveryDate,
+            additionalInfo: checkout.additionalInfo,
           },
         );
 
@@ -147,7 +166,7 @@ export class CartService {
           payment = await this.paymenService.initialize(
             {
               amount: amountToPay,
-              paymentProvider: PaymentProviders.PAYSTACK,
+              paymentProvider: PaymentProviders.MONNIFY,
               entity: PaymentEntity.SHIPMENT,
               entityReference: shipment.reference,
             },
@@ -170,7 +189,7 @@ export class CartService {
             status: ShipmentStatus.processing,
           });
           console.log('finished charging wallet 2');
-          for (const item of carts) {
+          for (const item of checkoutSetting.carts) {
             const product = await transactionalEntityManager.findOneBy(
               Product,
               {
@@ -201,6 +220,113 @@ export class CartService {
         };
       },
     );
+  }
+
+  async checkoutSettings(user: User) {
+    const config = await this.appConfigService.getConfig();
+
+    const address = await this.addressRepository.findOneBy({
+      userId: user.id,
+    });
+    const carts = await this.cartRepository.find({
+      where: { userId: user.id },
+      relations: ['product', 'product.category', 'product.category.band'],
+    });
+
+    const subTotal = carts.reduce((sum, cart) => {
+      return sum + cart.product.sellingPrice * cart.quantity;
+    }, 0);
+
+    const checkoutBands: ProductBand[] = [];
+    for (const cart of carts) {
+      const band = cart.product.category.band;
+      if (band && !checkoutBands.includes(band)) {
+        checkoutBands.push(band);
+      }
+    }
+
+    const fees = {};
+    let deliveryPrice = 0;
+    let minimumOrderAmount = 0;
+
+    for (const band of checkoutBands) {
+      if (band.fees && band.fees?.length > 0) {
+        for (const fee of band.fees) {
+          const feeName = fee.name?.toLowerCase();
+          fees[feeName] =
+            (fees[feeName] ?? 0) + this.calculateFee(subTotal, fee);
+        }
+      }
+
+      if (address && address.lgaId) {
+        const location = await this.locationRepository.findOneBy({
+          bandId: band.id,
+          lgaId: address.lgaId,
+        });
+        const dprice = location
+          ? location.deliveryPrice
+          : config.defaultDeliveryPrice;
+        if (dprice > deliveryPrice) {
+          deliveryPrice = dprice;
+        }
+      }
+
+      if (band.minimumOrderAmount > minimumOrderAmount) {
+        minimumOrderAmount = band.minimumOrderAmount;
+      }
+    }
+
+    let discountType = 'NONE';
+    let discountValue = 0;
+    let discountValueType = FeeType.FLAT;
+    let discount = 0;
+
+    if (config.discountStatus && subTotal >= config.discountThreshold) {
+      discountType = 'AUTO DISCOUNT';
+      discountValue = config.discountValue;
+      discountValueType = config.discountValueType as FeeType;
+      discount = this.calculateFee(subTotal, {
+        type: discountValueType,
+        value: discountValue,
+      });
+    }
+
+    let pointToCredit = 0;
+    if (config?.pointStatus && subTotal >= config?.pointThreshold) {
+      pointToCredit = Math.floor(subTotal / config?.pointThreshold);
+    }
+
+    const totalFees: number = Object.values(fees).reduce(
+      (sum: number, value: number) => sum + value,
+      0,
+    ) as number;
+
+    return {
+      subTotal,
+      fees,
+      discount: {
+        discountType,
+        discountValueType,
+        discountValue,
+        discount,
+      },
+      deliveryPrice,
+      amountToPay: subTotal + (totalFees ?? 0) + deliveryPrice - discount,
+      checkoutBands,
+      minimumOrderAmount,
+      pointToCredit,
+      carts,
+    };
+  }
+
+  calculateFee(amount, data: { value: number; type: FeeType }) {
+    if (!data.value) {
+      return 0;
+    }
+    if (data.type === FeeType.FLAT) {
+      return data.value;
+    }
+    return (data.value / 100) * amount;
   }
 
   async saveWishList(user: User) {
