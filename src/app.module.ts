@@ -38,7 +38,6 @@ import paystackConfig from './configs/paystack.config';
 import { PaymentModule } from './modules/payment/payment.module';
 import { ReviewModule } from './modules/review/review.module';
 import { QuickGuideModule } from './modules/quick-guide/quick-guide.module';
-import { HealthCalculatorModule } from './modules/health-calculator/health-calculator.module';
 import { WalletModule } from './modules/wallet/wallet.module';
 import { TransactionModule } from './modules/transaction/transaction.module';
 import { SpecialRequestModule } from './modules/special-request/special-request.module';
@@ -104,7 +103,6 @@ import gokadaConfig from './configs/gokada.config';
     PaymentModule,
     ReviewModule,
     QuickGuideModule,
-    HealthCalculatorModule,
     WalletModule,
     TransactionModule,
     SpecialRequestModule,
