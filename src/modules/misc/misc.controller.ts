@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UploadedFile,
@@ -42,6 +43,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from '../user/dto/user.dto';
 import { LGA } from '../location/entities/lga.entity';
 import { MiscService } from './misc.service';
+import { SaveTokenDto, UpdateTokenDto } from './dto/device-token.dto';
+import { DeviceToken } from './entities/device-tokens.entity';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Others')
@@ -53,6 +56,8 @@ export class MiscController {
     @InjectRepository(User) private userRepository: Repository<User>,
     @InjectRepository(Wallet) private walletRepository: Repository<Wallet>,
     @InjectRepository(LGA) private lgaRepository: Repository<LGA>,
+    @InjectRepository(DeviceToken)
+    private deviceTokenRepository: Repository<DeviceToken>,
     private miscService: MiscService,
   ) {}
 
@@ -204,7 +209,7 @@ export class MiscController {
     };
   }
 
-  @ApiOkResponse({ status: 200, type: CityResponseDto })
+  @ApiOkResponse()
   @HttpCode(200)
   @ApiQuery({
     name: 'key',
@@ -216,6 +221,42 @@ export class MiscController {
       status: true,
       message: 'success',
       data: await this.miscService.searchLocation(search),
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Post('device/token')
+  async saveDeviceToken(@Body() request: SaveTokenDto) {
+    const exist = await this.deviceTokenRepository.findOneBy({
+      token: request.token,
+    });
+    if (exist) {
+      await this.deviceTokenRepository.update(exist.id, request);
+    } else {
+      const create = await this.deviceTokenRepository.create(request);
+      await this.deviceTokenRepository.save(create);
+    }
+
+    return {
+      status: true,
+      message: 'success',
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Patch('device/token')
+  async updateDeviceToken(@Body() request: UpdateTokenDto) {
+    const exist = await this.deviceTokenRepository.findOneBy({
+      deviceId: request.deviceId,
+    });
+    if (exist) {
+      await this.deviceTokenRepository.update(exist.id, request);
+    }
+    return {
+      status: true,
+      message: 'success',
     };
   }
 }

@@ -5,6 +5,7 @@ import { Address } from 'src/modules/address/entities/address.entity';
 import { Ssions } from 'src/modules/auth/entities/ssions.entity';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { Wish } from 'src/modules/cart/entities/wish.entity';
+import { DeviceToken } from 'src/modules/misc/entities/device-tokens.entity';
 import { NotificationReadReceipt } from 'src/modules/notification/entities/notification-read-receipt.entity';
 import { Notification } from 'src/modules/notification/entities/notification.entity';
 import { PaymentRequest } from 'src/modules/payment/entities/payment-request.entity';
@@ -111,6 +112,9 @@ export class User {
 
   @OneToMany(() => Activity, (activity) => activity.user)
   activities?: Activity[];
+
+  @OneToMany(() => DeviceToken, (token) => token.user)
+  deviceTokens?: DeviceToken[];
 
   @OneToMany(() => Notification, (notification) => notification.user)
   @Exclude()

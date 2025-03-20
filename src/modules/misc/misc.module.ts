@@ -8,13 +8,14 @@ import { Wallet } from '../wallet/entities/wallet.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LGA } from '../location/entities/lga.entity';
 import { MiscService } from './misc.service';
+import { DeviceToken } from './entities/device-tokens.entity';
 
 @Module({
   imports: [
     HttpModule,
     SharedModule,
     MailModule,
-    TypeOrmModule.forFeature([User, Wallet, LGA]),
+    TypeOrmModule.forFeature([User, Wallet, LGA, DeviceToken]),
   ],
   controllers: [MiscController],
   providers: [MiscService],
