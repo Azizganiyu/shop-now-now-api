@@ -67,7 +67,7 @@ export class PaymentService {
     this.setMonnifyAccessToken();
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES)
+  @Cron(CronExpression.EVERY_5_MINUTES)
   async setMonnifyAccessToken() {
     const basic = this.helperService.encodeBase64(
       `${this.configService.get<string>('monnify.key')}:${this.configService.get<string>('monnify.secret')}`,
@@ -157,7 +157,7 @@ export class PaymentService {
             amount: request.amount,
             customerName: `${user.firstName} ${user.lastName}`,
             customerEmail: user.email,
-            paymentReference: request.entityReference,
+            paymentReference: this.helperService.generateRandomAlphaNum(22),
             paymentDescription: 'Purchase',
             currencyCode: 'NGN',
             contractCode: this.configService.get<string>('monnify.contract'),
