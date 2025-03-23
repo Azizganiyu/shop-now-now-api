@@ -52,6 +52,7 @@ import { DeliveryModule } from './modules/delivery/delivery.module';
 import monnifyConfig from './configs/monnify.config';
 import googleConfig from './configs/google.config';
 import gokadaConfig from './configs/gokada.config';
+import cloudinaryConfig from './configs/cloudinary.config';
 
 @Module({
   imports: [
@@ -83,6 +84,7 @@ import gokadaConfig from './configs/gokada.config';
         monnifyConfig,
         googleConfig,
         gokadaConfig,
+        cloudinaryConfig,
       ],
       expandVariables: true,
       validate,

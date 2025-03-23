@@ -15,6 +15,7 @@ import { NotificationReadReceipt } from './entities/notification-read-receipt.en
 import { ConfigService } from '@nestjs/config';
 import { OrderReceipt } from './notification-generator/order.receipt';
 import { AppConfig } from '../app-config/entities/app-config.entity';
+import { FirebaseService } from './firebase/firebase.service';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { AppConfig } from '../app-config/entities/app-config.entity';
     HelperService,
     RequestContextService,
     OrderReceipt,
+    FirebaseService,
   ],
   exports: [
     NotificationService,

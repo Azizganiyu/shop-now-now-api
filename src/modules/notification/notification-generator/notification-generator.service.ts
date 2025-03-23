@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { MessageAttachment, NotificationDto } from '../dto/notification.dto';
+import {
+  MessageAttachment,
+  NotificationChannels,
+  NotificationDto,
+} from '../dto/notification.dto';
 import { ConfigService } from '@nestjs/config';
 import { InjectQueue } from '@nestjs/bull';
 import { Queue } from 'bull';
-import { EmailNotification } from '../dto/notification-message.dto';
+import {
+  EmailNotification,
+  LocalNotification,
+} from '../dto/notification-message.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { OrderReceipt } from './order.receipt';
 import { Order } from 'src/modules/order/entities/order.entity';
@@ -14,7 +21,7 @@ import { IsNull, Not, Repository } from 'typeorm';
 
 export interface NotificationGeneratorDto {
   userId?: string;
-  channels: string[];
+  channels: NotificationChannels[];
 }
 @Injectable()
 export class NotificationGeneratorService {
@@ -146,7 +153,7 @@ export class NotificationGeneratorService {
     };
     const notification: NotificationDto = {
       message: { mail },
-      channels: ['email'],
+      channels: [NotificationChannels.email],
       userId: user.id,
     };
     this.notificationQueue.add('notification', notification);
@@ -167,8 +174,14 @@ export class NotificationGeneratorService {
       message: `<p>${data.message}</p> <p> <strong></strong> ${image} </p>`,
       preference: this.preference,
     };
+
+    const local: LocalNotification = {
+      title: data.subject,
+      message: `<p>${data.message}</p> <p> <strong></strong> ${image} </p>`,
+    };
+
     const notification: NotificationDto = {
-      message: { mail },
+      message: { mail, local },
       channels: data.channel,
       userId: data.user.id,
     };
@@ -194,7 +207,7 @@ export class NotificationGeneratorService {
       };
       const notification: NotificationDto = {
         message: { mail },
-        channels: ['email'],
+        channels: [NotificationChannels.email],
       };
       this.notificationQueue.add('notification', notification);
     }
@@ -241,9 +254,15 @@ export class NotificationGeneratorService {
       message: this.orderReceipt.generateProcessing(info, order),
       preference: this.preference,
     };
+
+    const local: LocalNotification = {
+      title: subject,
+      message: info,
+    };
+
     const notification: NotificationDto = {
-      message: { mail },
-      channels: ['email'],
+      message: { mail, local },
+      channels: [NotificationChannels.email, NotificationChannels.local],
       userId: order.userId,
     };
     this.notificationQueue.add('notification', notification);

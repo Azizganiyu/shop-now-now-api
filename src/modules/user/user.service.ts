@@ -21,6 +21,7 @@ import { NotificationGeneratorService } from '../notification/notification-gener
 import { VerifyDto } from '../auth/dto/verify.dto';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UserRole } from './dto/user.dto';
+import { NotificationChannels } from '../notification/dto/notification.dto';
 
 @Injectable()
 export class UserService {
@@ -67,7 +68,7 @@ export class UserService {
       tokenExpireAt: this.helperService.setDateFuture(3600),
     });
     this.notificationGenerator.sendVerificationMail(
-      { channels: ['email'] },
+      { channels: [NotificationChannels.email] },
       user.email,
       code,
     );

@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/services/mail.service';
 import { Brackets, Repository } from 'typeorm';
 import { FindNotificationDto } from './dto/find-notification.dto';
-import { NotificationDto, SendMessageDto } from './dto/notification.dto';
+import {
+  NotificationChannels,
+  NotificationDto,
+  SendMessageDto,
+} from './dto/notification.dto';
 import { Notification } from './entities/notification.entity';
 import { PageOptionsDto } from 'src/utilities/pagination/dtos';
 import { PageMetaDto } from 'src/utilities/pagination/page-meta.dto';
 import { PageDto } from 'src/utilities/pagination/page.dto';
-import { RequestContextService } from 'src/utilities/request-context.service';
 import {
   EmailNotification,
   LocalNotification,
@@ -18,6 +21,8 @@ import { HelperService } from 'src/utilities/helper.service';
 import { NotificationReadReceipt } from './entities/notification-read-receipt.entity';
 import { UserRole } from '../user/dto/user.dto';
 import { NotificationGeneratorService } from './notification-generator/notification-generator.service';
+import { FirebaseService } from './firebase/firebase.service';
+import { DeviceToken } from '../misc/entities/device-tokens.entity';
 
 @Injectable()
 export class NotificationService {
@@ -29,9 +34,9 @@ export class NotificationService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private mailService: MailService,
-    private requestContext: RequestContextService,
     private helperService: HelperService,
     private _ng: NotificationGeneratorService,
+    private firebaseNotification: FirebaseService,
   ) {}
 
   /**
@@ -45,18 +50,30 @@ export class NotificationService {
     let localSent = false;
 
     const user: User = request.userId
-      ? await this.userRepository.findOneBy({ id: request.userId })
+      ? await this.userRepository.findOne({
+          where: { id: request.userId },
+          relations: ['deviceTokens'],
+        })
       : null;
 
-    if (request.channels.includes('email')) {
+    if (
+      request.channels.includes(NotificationChannels.email) &&
+      request.message.mail
+    ) {
       const mail: EmailNotification = request.message.mail;
       mail.fullName = mail.fullName ?? this.helperService.getFullName(user);
       mail.emailAddress = mail.emailAddress ?? user.email;
       emailSent = await this.sendEmail(mail);
     }
 
-    if (request.channels.includes('local')) {
-      localSent = true;
+    if (
+      request.channels.includes(NotificationChannels.local) &&
+      request.message.local &&
+      user.deviceTokens &&
+      user.deviceTokens?.length > 0
+    ) {
+      const push = request.message.local;
+      localSent = await this.sendPush(push, user.deviceTokens);
     }
 
     return await this.save(request, {
@@ -179,10 +196,14 @@ export class NotificationService {
   async message(payload: SendMessageDto) {
     let users: User[] = [];
     if (payload.userId) {
-      users = await this.userRepository.findBy({ id: payload.userId });
+      users = await this.userRepository.find({
+        where: { id: payload.userId },
+      });
     } else if (payload.all) {
-      users = await this.userRepository.findBy({
-        roleId: UserRole.user,
+      users = await this.userRepository.find({
+        where: {
+          roleId: UserRole.user,
+        },
       });
     }
     for (const user of users) {
@@ -191,8 +212,18 @@ export class NotificationService {
         message: payload.message,
         attachment: payload.attachment,
         user,
-        channel: ['email'],
+        channel: payload.channels,
       });
     }
+  }
+
+  async sendPush(data: LocalNotification, tokens: DeviceToken[]) {
+    return await this.firebaseNotification.sendNotification(
+      tokens,
+      data.title,
+      data.message,
+      data.image,
+    );
+    return false;
   }
 }

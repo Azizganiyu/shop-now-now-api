@@ -3,6 +3,7 @@ import { NotificationMessage } from './notification-message.dto';
 import {
   IsBoolean,
   IsDefined,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -44,6 +45,13 @@ export class MessageAttachment {
   size: number;
 }
 
+export enum NotificationChannels {
+  websocket = 'websocket',
+  email = 'email',
+  local = 'local',
+  sms = 'sms',
+}
+
 export class SendMessageDto {
   @ApiPropertyOptional()
   @IsOptional()
@@ -68,4 +76,10 @@ export class SendMessageDto {
   @IsOptional()
   @ValidateNested()
   attachment?: MessageAttachment;
+
+  @ApiProperty({ enum: NotificationChannels, isArray: true })
+  @IsDefined()
+  @IsNotEmpty()
+  @IsEnum(NotificationChannels)
+  channels: NotificationChannels[];
 }

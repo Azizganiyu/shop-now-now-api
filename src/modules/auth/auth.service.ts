@@ -22,6 +22,7 @@ import { RequestContextService } from 'src/utilities/request-context.service';
 import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
+import { NotificationChannels } from '../notification/dto/notification.dto';
 
 @Injectable()
 export class AuthService {
@@ -69,7 +70,7 @@ export class AuthService {
     if (user.role.tag === 'admin') {
       await this.notificationGenerator.sendLoginMail({
         userId: user.id,
-        channels: ['email'],
+        channels: [NotificationChannels.email],
       });
     }
 
@@ -102,7 +103,7 @@ export class AuthService {
     await this.notificationGenerator.sendPasswordRecoveryMail(
       {
         userId: user.id,
-        channels: ['email'],
+        channels: [NotificationChannels.email],
       },
       await this.helperService.decrypt(user.code),
     );
@@ -138,7 +139,7 @@ export class AuthService {
     await this.notificationGenerator.sendPasswordRecoverySuccessMail(
       {
         userId: user.id,
-        channels: ['email'],
+        channels: [NotificationChannels.email],
       },
       {
         email: user.email,

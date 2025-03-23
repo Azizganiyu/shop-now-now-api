@@ -28,7 +28,6 @@ import { HelperService } from 'src/utilities/helper.service';
 import { FileDto } from './dto/file.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { DecryptDto } from './dto/decrypt.dto';
-import { diskStorage } from 'multer';
 import { ConfigService } from '@nestjs/config';
 import { CountryResponseDto } from './responses/country-response.dto';
 import { StateResponseDto } from './responses/state-response.dto';
@@ -45,6 +44,44 @@ import { LGA } from '../location/entities/lga.entity';
 import { MiscService } from './misc.service';
 import { SaveTokenDto, UpdateTokenDto } from './dto/device-token.dto';
 import { DeviceToken } from './entities/device-tokens.entity';
+import { v2 as cloudinary } from 'cloudinary';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    const originalName = file.originalname.split('.')[0];
+    const extension = file.originalname.split('.').pop();
+    const randomString = generateRandomString(8);
+    const uniqueFileName = `${originalName}_${randomString}.${extension}`;
+
+    return {
+      folder: 'uploads',
+      resource_type: 'auto',
+      public_id: uniqueFileName,
+      transformation: [
+        { width: 1000, crop: 'scale' }, // Resize (max 800x600)
+        { quality: 'auto' }, // Optimize quality
+        { fetch_format: 'auto' }, // Serve best format (WebP, JPEG, etc.)
+      ],
+    };
+  },
+});
+
+const generateRandomString = (length = 6) => {
+  return Math.random()
+    .toString(36)
+    .substring(2, 2 + length);
+};
 
 @UseInterceptors(ClassSerializerInterceptor)
 @ApiTags('Others')
@@ -152,41 +189,17 @@ export class MiscController {
     };
   }
 
-  /**
-   * Handles file upload and returns the uploaded file URL.
-   *
-   * @param {Express.Multer.File} file - The uploaded file.
-   * @returns {Object} An object containing status, message, and the uploaded file URL.
-   */
   @ApiOkResponse({ status: 200, type: UploadResponseDto })
   @ApiBody({ type: FileDto })
   @ApiConsumes('multipart/form-data')
   @Post('upload-file')
   @HttpCode(201)
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (req: any, file, cb) => {
-          const destination = './uploads/files';
-          cb(null, destination);
-        },
-        filename: (req: any, file, cb) => {
-          const splitted = file.originalname.split('.');
-          const name = splitted[0];
-          const ext = splitted[splitted.length - 1];
-          const newName =
-            name.split(' ').join('_') + '_' + Date.now() + '.' + ext;
-          cb(null, newName);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', { storage }))
   async upload(@UploadedFile() file: Express.Multer.File) {
-    const url = this.configService.get<string>('app.serverUrl') + file.path;
     return {
       status: true,
-      message: 'file uploaded successfully',
-      data: { url },
+      message: 'File uploaded successfully',
+      data: { url: file.path },
     };
   }
 

@@ -12,6 +12,7 @@ export class EmailNotification {
 export class LocalNotification {
   title: string;
   message: string;
+  image?: string;
 }
 
 export class NotificationMessage {
