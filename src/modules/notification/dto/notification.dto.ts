@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { NotificationMessage } from './notification-message.dto';
 import {
+  IsArray,
   IsBoolean,
   IsDefined,
   IsEnum,
@@ -80,6 +81,7 @@ export class SendMessageDto {
   @ApiProperty({ enum: NotificationChannels, isArray: true })
   @IsDefined()
   @IsNotEmpty()
-  @IsEnum(NotificationChannels)
+  @IsArray()
+  @IsEnum(NotificationChannels, { each: true })
   channels: NotificationChannels[];
 }

@@ -21,6 +21,7 @@ export class FirebaseService {
     body: string,
     imageUrl: string = null,
   ): Promise<boolean> {
+    console.log('sending push', tokens, title, body);
     try {
       const notification =
         imageUrl && imageUrl?.length > 0
@@ -40,6 +41,7 @@ export class FirebaseService {
       await this.firebaseApp.messaging().sendEachForMulticast(message);
       return true;
     } catch (error) {
+      console.log(error);
       return false;
     }
   }

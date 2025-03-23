@@ -66,6 +66,7 @@ export class NotificationService {
       emailSent = await this.sendEmail(mail);
     }
 
+    console.log('sending push', user.deviceTokens);
     if (
       request.channels.includes(NotificationChannels.local) &&
       request.message.local &&
