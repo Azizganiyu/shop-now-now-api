@@ -5,6 +5,11 @@ export class SaveTokenDto {
   @ApiProperty()
   @IsDefined()
   @IsNotEmpty()
+  userId: string;
+
+  @ApiProperty()
+  @IsDefined()
+  @IsNotEmpty()
   deviceId: string;
 
   @ApiProperty()

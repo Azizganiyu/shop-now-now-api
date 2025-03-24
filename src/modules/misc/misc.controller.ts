@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   Param,
-  Patch,
   Post,
   Query,
   UploadedFile,
@@ -42,11 +41,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserRole } from '../user/dto/user.dto';
 import { LGA } from '../location/entities/lga.entity';
 import { MiscService } from './misc.service';
-import { SaveTokenDto, UpdateTokenDto } from './dto/device-token.dto';
+import { SaveTokenDto } from './dto/device-token.dto';
 import { DeviceToken } from './entities/device-tokens.entity';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import * as dotenv from 'dotenv';
+// import { FirebaseService } from '../notification/firebase/firebase.service';
 
 dotenv.config();
 
@@ -96,6 +96,7 @@ export class MiscController {
     @InjectRepository(DeviceToken)
     private deviceTokenRepository: Repository<DeviceToken>,
     private miscService: MiscService,
+    // private firebaseService: FirebaseService,
   ) {}
 
   /**
@@ -242,7 +243,7 @@ export class MiscController {
   @Post('device/token')
   async saveDeviceToken(@Body() request: SaveTokenDto) {
     const exist = await this.deviceTokenRepository.findOneBy({
-      token: request.token,
+      userId: request.userId,
     });
     if (exist) {
       await this.deviceTokenRepository.update(exist.id, request);
@@ -257,19 +258,40 @@ export class MiscController {
     };
   }
 
-  @ApiOkResponse()
-  @HttpCode(200)
-  @Patch('device/token')
-  async updateDeviceToken(@Body() request: UpdateTokenDto) {
-    const exist = await this.deviceTokenRepository.findOneBy({
-      deviceId: request.deviceId,
-    });
-    if (exist) {
-      await this.deviceTokenRepository.update(exist.id, request);
-    }
-    return {
-      status: true,
-      message: 'success',
-    };
-  }
+  // @ApiOkResponse()
+  // @HttpCode(200)
+  // @Patch('device/token')
+  // async updateDeviceToken(@Body() request: UpdateTokenDto) {
+  //   const exist = await this.deviceTokenRepository.findOneBy({
+  //     deviceId: request.deviceId,
+  //   });
+  //   if (exist) {
+  //     await this.deviceTokenRepository.update(exist.id, request);
+  //   }
+  //   return {
+  //     status: true,
+  //     message: 'success',
+  //   };
+  // }
+
+  // @ApiOkResponse()
+  // @HttpCode(200)
+  // @Patch('device/push')
+  // async sendPush() {
+  //   await this.firebaseService.sendNotification(
+  //     [
+  //       {
+  //         token:
+  //           'cAhiX41jSRmD9wfrWgjHwf:APA91bE1wdMQACUFgwScbJHqh2ljoPxjpvIlE44kgmsoqggilK10zr3x8yZIepFMmtAbw2G1ZJzgxud7Fp71dG7D0wC_DezXfDWbAW1g5hTobfoqZWeXeJE',
+  //         deviceId: '1',
+  //       },
+  //     ] as DeviceToken[],
+  //     'Hello',
+  //     'Message',
+  //   );
+  //   return {
+  //     status: true,
+  //     message: 'success',
+  //   };
+  // }
 }
