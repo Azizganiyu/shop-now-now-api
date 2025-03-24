@@ -21,10 +21,7 @@ export class FirebaseService {
     body: string,
     imageUrl: string = null,
   ): Promise<boolean> {
-    console.log(
-      'sending push',
-      tokens.map((token) => token.token),
-    );
+    console.log('sending push', tokens.map((token) => token.token)[0]);
     try {
       const notification =
         imageUrl && imageUrl?.length > 0
@@ -37,11 +34,11 @@ export class FirebaseService {
               title,
               body,
             };
-      const message: admin.messaging.MulticastMessage = {
+      const message: admin.messaging.Message = {
         notification,
-        tokens: tokens.map((token) => token.token),
+        token: tokens.map((token) => token.token)[0],
       };
-      await this.firebaseApp.messaging().sendEachForMulticast(message);
+      await this.firebaseApp.messaging().send(message);
       return true;
     } catch (error) {
       console.log(error);
