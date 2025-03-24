@@ -21,7 +21,10 @@ export class FirebaseService {
     body: string,
     imageUrl: string = null,
   ): Promise<boolean> {
-    console.log('sending push', tokens, title, body);
+    console.log(
+      'sending push',
+      tokens.map((token) => token.token),
+    );
     try {
       const notification =
         imageUrl && imageUrl?.length > 0
