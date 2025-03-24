@@ -177,7 +177,7 @@ export class NotificationGeneratorService {
 
     const local: LocalNotification = {
       title: data.subject,
-      message: `<p>${data.message}</p> <p> <strong></strong> ${image} </p>`,
+      message: data.message,
     };
 
     const notification: NotificationDto = {
