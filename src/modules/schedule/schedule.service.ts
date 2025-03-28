@@ -182,6 +182,30 @@ export class ScheduleService {
     const endTimeObj = new Date(nigeriaDate);
     endTimeObj.setHours(endHour, endMinute, 0, 0); // Set provided end time
 
+    // Get the actual current time in UTC+1 (Nigeria time)
+    const now = new Date();
+    now.setUTCHours(now.getUTCHours() + 1);
+
+    // If the current time is past the start time, adjust to the next closest 30-minute mark
+    if (currentTime < now) {
+      let adjustedHour = now.getHours();
+      let adjustedMinute = now.getMinutes();
+
+      // Round up to the nearest 30-minute mark
+      adjustedMinute =
+        adjustedMinute % 30 === 0
+          ? adjustedMinute
+          : Math.ceil(adjustedMinute / 30) * 30;
+
+      // If rounding pushed it to 60, increment the hour
+      if (adjustedMinute === 60) {
+        adjustedHour += 1;
+        adjustedMinute = 0;
+      }
+
+      currentTime.setHours(adjustedHour, adjustedMinute, 0, 0);
+    }
+
     const formatTime = (date: Date) => {
       const hours24 = date.getHours().toString().padStart(2, '0');
       const minutes = date.getMinutes().toString().padStart(2, '0');
