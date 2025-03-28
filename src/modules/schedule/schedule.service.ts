@@ -172,12 +172,32 @@ export class ScheduleService {
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
 
-    // Convert the provided date to UTC+1 (Nigeria Time)
+    const now = new Date();
     let currentTime = new Date(date);
-    currentTime.setUTCHours(startHour + 1, startMinute, 0, 0); // Adjust to UTC+1
+    currentTime.setHours(startHour, startMinute, 0, 0);
 
     const endTimeObj = new Date(date);
-    endTimeObj.setUTCHours(endHour + 1, endMinute, 0, 0); // Adjust to UTC+1
+    endTimeObj.setHours(endHour, endMinute, 0, 0);
+
+    // If the start time is in the past, adjust it to the next closest 30-minute mark
+    if (currentTime < now) {
+      let adjustedHour = now.getHours();
+      let adjustedMinute = now.getMinutes();
+
+      // Round up to the nearest 30-minute mark
+      adjustedMinute =
+        adjustedMinute % 30 === 0
+          ? adjustedMinute
+          : Math.ceil(adjustedMinute / 30) * 30;
+
+      // If rounding pushed it to 60, increment the hour
+      if (adjustedMinute === 60) {
+        adjustedHour += 1;
+        adjustedMinute = 0;
+      }
+
+      currentTime.setHours(adjustedHour, adjustedMinute, 0, 0);
+    }
 
     const formatTime = (date: Date) => {
       const hours24 = date.getHours().toString().padStart(2, '0');
@@ -191,7 +211,7 @@ export class ScheduleService {
       };
     };
 
-    // Generate slots every 30 minutes, with the specified interval
+    // Generate slots every 30 minutes with interval duration
     while (
       currentTime.getTime() + intervalMinutes * 60 * 1000 <=
       endTimeObj.getTime()
