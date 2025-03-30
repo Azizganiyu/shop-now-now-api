@@ -64,7 +64,9 @@ export class PaymentService {
     private transactionService: TransactionService,
     private _redis: RedisCacheService,
   ) {
-    this.setMonnifyAccessToken();
+    setTimeout(() => {
+      this.setMonnifyAccessToken();
+    }, 5000);
   }
 
   @Cron(CronExpression.EVERY_5_MINUTES)
@@ -88,10 +90,7 @@ export class PaymentService {
       this.monnifyAccessToken = response.data.responseBody.accessToken;
       console.log(this.monnifyAccessToken);
     } catch (error) {
-      this.activityService.log(error, 'PAYSTACK INITIALIZE PAYMENT');
-      throw new BadRequestException(
-        error?.response?.data ?? 'Unable to initialize payment',
-      );
+      this.activityService.log(error, 'UNABLE TO SET MONNIFY TOKEN');
     }
   }
 
