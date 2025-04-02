@@ -4,7 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { ProductCategory } from '../entities/product-category.entity';
 import { Product } from '../entities/product.entity';
 import { HelperService } from 'src/utilities/helper.service';
@@ -40,7 +40,7 @@ export class ProductCategoryService {
           .orderBy('category.order', 'ASC')
           .getMany()
       : await this.categoryRepository.find({
-          where: { status: true },
+          where: { status: true, bandId: Not(IsNull()) },
           order: { order: 'ASC' },
         });
   }

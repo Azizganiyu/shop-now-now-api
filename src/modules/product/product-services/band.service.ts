@@ -7,12 +7,21 @@ import {
   CreateProductBand,
   UpdateProductBand,
 } from '../dto/product-create.dto';
+import { Location } from 'src/modules/location/entities/location.entity';
+import { ProductCategory } from '../entities/product-category.entity';
+import { Schedule } from 'src/modules/schedule/entities/schedule.entity';
 
 @Injectable()
 export class ProductBandService {
   constructor(
     @InjectRepository(ProductBand)
     private readonly bandRepository: Repository<ProductBand>,
+    @InjectRepository(Location)
+    private readonly locationRepository: Repository<Location>,
+    @InjectRepository(ProductCategory)
+    private readonly categoryRepository: Repository<ProductCategory>,
+    @InjectRepository(Schedule)
+    private readonly scheduleRepository: Repository<Schedule>,
     private helperService: HelperService,
   ) {}
 
@@ -93,6 +102,9 @@ export class ProductBandService {
    * @throws ForbiddenException if the band has associated products or sub-bands.
    */
   async remove(id: string) {
-    return await this.bandRepository.softDelete(id);
+    await this.categoryRepository.update({ bandId: id }, { bandId: null });
+    await this.scheduleRepository.delete({ bandId: id });
+    await this.locationRepository.delete({ bandId: id });
+    await this.bandRepository.delete(id);
   }
 }

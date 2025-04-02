@@ -46,6 +46,11 @@ export class ProductService {
         },
       )
       .andWhere(
+        !filter.admin || filter.admin != 'true'
+          ? `category.bandId IS NOT NULL`
+          : '1=1',
+      )
+      .andWhere(
         filter.admin == 'true' && filter.status
           ? `product.status = :adminStatus`
           : '1=1',

@@ -11,10 +11,18 @@ import { ProductBandController } from './product-controllers/product-band.contro
 import { ProductBandService } from './product-services/band.service';
 import { ProductBand } from './entities/product-band.entity';
 import { AppConfigModule } from '../app-config/app-config.module';
+import { Location } from '../location/entities/location.entity';
+import { Schedule } from '../schedule/entities/schedule.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, ProductCategory, ProductBand]),
+    TypeOrmModule.forFeature([
+      Product,
+      ProductCategory,
+      ProductBand,
+      Location,
+      Schedule,
+    ]),
     SharedModule,
     AppConfigModule,
   ],
