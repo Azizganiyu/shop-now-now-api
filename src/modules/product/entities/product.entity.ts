@@ -13,6 +13,7 @@ import { Exclude } from 'class-transformer';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
 import { OrderItem } from 'src/modules/order/entities/order-item.entity';
 import { ProductReview } from 'src/modules/review/entities/review.entity';
+import { WishItem } from 'src/modules/cart/entities/wish-item.entity';
 
 @Entity()
 export class Product {
@@ -71,6 +72,10 @@ export class Product {
   @OneToMany(() => OrderItem, (item) => item.product)
   @Exclude()
   orderItems?: OrderItem[];
+
+  @OneToMany(() => WishItem, (item) => item.product)
+  @Exclude()
+  wishItems?: WishItem[];
 
   @ApiProperty()
   @Column({ default: true })

@@ -144,6 +144,7 @@ export class OverviewService {
       .leftJoinAndSelect('items.product', 'product')
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('order.shipments', 'shipments')
+      .leftJoinAndSelect('shipments.lga', 'lga')
       .leftJoinAndSelect('order.user', 'user')
       .orderBy('order.createdAt', 'DESC')
       .take(5)

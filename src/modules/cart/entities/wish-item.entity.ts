@@ -26,7 +26,7 @@ export class WishItem {
   @ApiProperty()
   productId: string;
 
-  @ManyToOne(() => Product, (product) => product.orderItems, { eager: true })
+  @ManyToOne(() => Product, (product) => product.wishItems, { eager: true })
   product?: Product;
 
   @Column()

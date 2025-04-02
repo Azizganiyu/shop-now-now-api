@@ -1,4 +1,8 @@
-import { BadGatewayException, Injectable } from '@nestjs/common';
+import {
+  BadGatewayException,
+  BadRequestException,
+  Injectable,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Location } from './entities/location.entity';
@@ -60,6 +64,15 @@ export class LocationService {
   }
 
   async remove(id: string) {
+    const location = await this.locationRepository.findOne({
+      where: { id },
+      relations: ['schedules'],
+    });
+    if (location.schedules.length > 0) {
+      throw new BadRequestException(
+        'Location has attached schedules, remove schedule or use the disable function',
+      );
+    }
     return await this.locationRepository.delete(id);
   }
 }

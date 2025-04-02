@@ -223,9 +223,20 @@ export class ProductService {
    * @returns Deleted product object.
    */
   async remove(id: string) {
-    // Check if the product has associated orders
-    // Check if the product has associated transactions
-    // Delete associated carts
+    const product = await this.productRepository.findOne({
+      where: { id },
+      relations: ['carts', 'reviews', 'orderItems', 'wishItems'],
+    });
+    if (
+      product.carts.length > 0 ||
+      product.reviews.length > 0 ||
+      product.orderItems.length > 0 ||
+      product.wishItems.length > 0
+    ) {
+      throw new BadRequestException(
+        'Product can not be removed at this time, please use the disable function',
+      );
+    }
     return await this.productRepository.delete(id);
   }
 }

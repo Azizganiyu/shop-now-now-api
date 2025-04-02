@@ -240,7 +240,7 @@ export class CartService {
     const checkoutBands: ProductBand[] = [];
     for (const cart of carts) {
       const band = cart.product.category.band;
-      if (band && !checkoutBands.includes(band)) {
+      if (band && !checkoutBands.some(({ id }) => id === band.id)) {
         checkoutBands.push(band);
       }
     }
