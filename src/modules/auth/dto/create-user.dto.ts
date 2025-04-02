@@ -77,6 +77,14 @@ export class UpdateUserDto {
   email?: string;
 }
 
+export class UpdateStaff extends UpdateUserDto {
+  @IsDefined()
+  @IsNotEmpty()
+  @ApiProperty()
+  @MaxLength(199)
+  roleId: string;
+}
+
 export class UpdateAvatarDto {
   @IsDefined()
   @IsNotEmpty()

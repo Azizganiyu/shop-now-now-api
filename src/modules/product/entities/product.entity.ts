@@ -35,7 +35,7 @@ export class Product {
   @Column({ type: 'double', scale: 2, precision: 20, nullable: true })
   sellingPrice?: number;
 
-  @Column({ default: 1, nullable: true })
+  @Column({ default: 1000000, nullable: true })
   @ApiProperty()
   stock?: number;
 

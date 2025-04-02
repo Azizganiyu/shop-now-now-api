@@ -21,7 +21,7 @@ import {
 import { Roles } from '../auth/decorator/roles.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
-import { CreateUserDto, UpdateUserDto } from '../auth/dto/create-user.dto';
+import { CreateUserDto, UpdateStaff } from '../auth/dto/create-user.dto';
 import { UserService } from '../user/user.service';
 import { RegisterResponseDto } from '../auth/responses/register-response.dto';
 import { UserFindResponseDto } from '../user/responses/find-user-response.dto';
@@ -81,7 +81,7 @@ export class StaffController {
   @HttpCode(200)
   @ApiParam({ name: 'id', description: 'id of staff' })
   @Patch(':id')
-  async updateStaff(@Param('id') id: string, @Body() request: UpdateUserDto) {
+  async updateStaff(@Param('id') id: string, @Body() request: UpdateStaff) {
     const user = await this.userService.findOne(id);
     if (user.role.tag != RoleTag.admin) {
       throw new ForbiddenException('specified user is not an admin');
