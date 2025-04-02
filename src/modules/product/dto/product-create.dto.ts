@@ -62,8 +62,6 @@ export class CreateProduct {
 
   @ApiPropertyOptional()
   @IsOptional()
-  @IsPositive()
-  @IsNumber()
   sellingPrice?: number;
 
   @ApiProperty()
