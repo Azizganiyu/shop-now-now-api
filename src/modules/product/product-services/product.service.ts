@@ -147,7 +147,8 @@ export class ProductService {
       const percentage =
         category.band.sellingPricePercentage ??
         appConfig.sellingPricePercentage;
-      product.sellingPrice = (percentage / 100) * product.costPrice;
+      product.sellingPrice =
+        (percentage / 100) * product.costPrice + product.costPrice;
     }
     const create = await this.productRepository.create({
       id,
@@ -186,7 +187,8 @@ export class ProductService {
       const percentage =
         category.band.sellingPricePercentage ??
         appConfig.sellingPricePercentage;
-      product.sellingPrice = (percentage / 100) * product.costPrice;
+      product.sellingPrice =
+        (percentage / 100) * product.costPrice + product.costPrice;
     }
     await this.productRepository.update(id, product);
     return await this.findOne(id);
