@@ -139,6 +139,7 @@ export class CartService {
             phone: address.phone,
             address: address.address,
             lgaId: address.lgaId,
+            houseAddress: address.houseAddress,
             amount: checkoutSetting.subTotal,
             amountToPay,
             fees: checkoutSetting.fees,

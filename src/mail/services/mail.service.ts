@@ -13,12 +13,14 @@ export class MailService {
    * @returns {boolean} Returns true if the email was sent successfully, otherwise false.
    */
   async sendMail(data: EmailNotification): Promise<boolean> {
+    const replyTo = data.replyTo ? { replyTo: data.replyTo } : {};
     try {
       await this.mailerService.sendMail({
         to: data.emailAddress,
         subject: data.subject,
         template: './mail_template',
         attachments: data.attachments ?? null,
+        ...replyTo,
         context: {
           subject: data.subject,
           name: data.fullName,

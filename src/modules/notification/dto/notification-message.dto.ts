@@ -3,6 +3,7 @@ export class EmailNotification {
   message: string;
   fullName?: string;
   emailAddress?: string;
+  replyTo?: string;
   action?: string;
   url?: string;
   preference: any;

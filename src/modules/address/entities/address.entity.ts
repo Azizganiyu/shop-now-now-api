@@ -61,6 +61,10 @@ export class Address {
   })
   address: { description: string; lat: number; lng: number };
 
+  @ApiProperty()
+  @Column({ length: 199, nullable: true })
+  houseAddress?: string;
+
   @OneToMany(() => OrderShipment, (item) => item.address)
   @Exclude()
   shipments?: OrderShipment[];

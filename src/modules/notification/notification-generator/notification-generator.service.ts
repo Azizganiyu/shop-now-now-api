@@ -18,6 +18,7 @@ import { ShipmentStatus } from 'src/modules/order/dto/order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AppConfig } from 'src/modules/app-config/entities/app-config.entity';
 import { IsNull, Not, Repository } from 'typeorm';
+import { SendMailDto } from 'src/modules/misc/dto/send-mail.dto';
 
 export interface NotificationGeneratorDto {
   userId?: string;
@@ -266,5 +267,50 @@ export class NotificationGeneratorService {
       userId: order.userId,
     };
     this.notificationQueue.add('notification', notification);
+  }
+
+  sendContactMail(request: SendMailDto) {
+    // Mail to support
+    const supportMail: EmailNotification = {
+      subject: `${request.subject}`,
+      message: `
+        <p>
+          <strong>Full Name:</strong> ${request.fullName} <br>
+          <strong>Email Address:</strong> ${request.email} <br>
+        </p>
+        <p>${request.message}</p>
+      `,
+      emailAddress: this.preference.supportEmail,
+      fullName: this.preference.appName,
+      replyTo: request.email,
+      preference: this.preference,
+    };
+
+    // Feedback mail to sender
+    const feedbackMail: EmailNotification = {
+      subject: `Thanks for contacting ${this.preference.appName}`,
+      message: `
+        <p>Thanks for reaching out to us. We’ve received your message and will get back to you as soon as possible.</p>
+        <p><em>Here's a copy of your message:</em></p>
+        <blockquote>${request.message}</blockquote>
+        <p>Best regards,<br/>The ${this.preference.appName} Team</p>
+      `,
+      emailAddress: request.email,
+      fullName: request.fullName,
+      preference: this.preference,
+    };
+
+    const supportNotification: NotificationDto = {
+      message: { mail: supportMail },
+      channels: [NotificationChannels.email],
+    };
+
+    const feedbackNotification: NotificationDto = {
+      message: { mail: feedbackMail },
+      channels: [NotificationChannels.email],
+    };
+
+    this.notificationQueue.add('notification', supportNotification);
+    this.notificationQueue.add('notification', feedbackNotification);
   }
 }

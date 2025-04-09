@@ -53,6 +53,10 @@ export class OrderShipment {
   address: { description: string; lat: number; lng: number };
 
   @ApiProperty()
+  @Column({ length: 199, nullable: true })
+  houseAddress?: string;
+
+  @ApiProperty()
   @Column({
     type: 'double',
     scale: 2,

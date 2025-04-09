@@ -20,6 +20,10 @@ export class LGA {
   @ApiProperty()
   name: string;
 
+  @Column()
+  @ApiProperty()
+  cities: string;
+
   @OneToMany(() => Location, (location) => location.lga)
   locations?: Location[];
 

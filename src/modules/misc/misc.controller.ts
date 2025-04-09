@@ -46,6 +46,8 @@ import { DeviceToken } from './entities/device-tokens.entity';
 import { v2 as cloudinary } from 'cloudinary';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import * as dotenv from 'dotenv';
+import { SendMailDto } from './dto/send-mail.dto';
+import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
 // import { FirebaseService } from '../notification/firebase/firebase.service';
 
 dotenv.config();
@@ -96,6 +98,7 @@ export class MiscController {
     @InjectRepository(DeviceToken)
     private deviceTokenRepository: Repository<DeviceToken>,
     private miscService: MiscService,
+    private _ng: NotificationGeneratorService,
     // private firebaseService: FirebaseService,
   ) {}
 
@@ -252,6 +255,17 @@ export class MiscController {
       await this.deviceTokenRepository.save(create);
     }
 
+    return {
+      status: true,
+      message: 'success',
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Post('mail/send')
+  async sendMail(@Body() request: SendMailDto) {
+    await this._ng.sendContactMail(request);
     return {
       status: true,
       message: 'success',
