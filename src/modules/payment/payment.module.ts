@@ -9,11 +9,13 @@ import { TransactionModule } from '../transaction/transaction.module';
 import { Wallet } from '../wallet/entities/wallet.entity';
 import { Product } from '../product/entities/product.entity';
 import { Order } from '../order/entities/order.entity';
+import { AppConfigModule } from '../app-config/app-config.module';
 
 @Module({
   imports: [
     SharedModule,
     TransactionModule,
+    AppConfigModule,
     TypeOrmModule.forFeature([
       PaymentRequest,
       OrderShipment,

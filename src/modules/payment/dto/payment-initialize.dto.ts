@@ -1,10 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsDefined,
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsPositive,
 } from 'class-validator';
 import { TransactionPurpose } from 'src/modules/transaction/dto/transaction.dto';
@@ -22,14 +21,6 @@ export class InitializePaymentDto {
   @IsPositive()
   @IsNumber()
   amount: number;
-
-  @ApiPropertyOptional({
-    enum: PaymentProviders,
-    default: PaymentProviders.MONNIFY,
-  })
-  @IsOptional()
-  @IsEnum(PaymentProviders)
-  paymentProvider: PaymentProviders = PaymentProviders.MONNIFY;
 
   @ApiProperty()
   @IsDefined()

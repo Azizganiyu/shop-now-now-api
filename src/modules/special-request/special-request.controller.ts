@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   Param,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -50,6 +51,18 @@ export class SpecialRequestController {
 
   @ApiOkResponse()
   @HttpCode(200)
+  @Get('unread-count')
+  async unreadCount() {
+    const data = await this.specialRequestService.getUnreadCount();
+    return {
+      status: true,
+      message: 'unread count retreived',
+      data,
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
   @Get()
   async findAll(@Query() pageOptionsdto: PageOptionsDto) {
     const data = await this.specialRequestService.findAll(pageOptionsdto);
@@ -57,6 +70,19 @@ export class SpecialRequestController {
       status: true,
       message: 'request retreived',
       data,
+    };
+  }
+
+  @Roles('admin')
+  @ApiOkResponse()
+  @HttpCode(200)
+  @ApiParam({ name: 'id', description: 'request ID' })
+  @Patch(':id/mark-read')
+  async markAsRead(@Param('id') id: string) {
+    await this.specialRequestService.markAsRead(id);
+    return {
+      status: true,
+      message: 'request markAsRead',
     };
   }
 

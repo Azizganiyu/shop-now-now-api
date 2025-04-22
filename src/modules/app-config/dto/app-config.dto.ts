@@ -126,4 +126,9 @@ export class CreateConfigDto {
   @IsOptional()
   @IsString()
   pickupPhone?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  paymentProvider?: string;
 }

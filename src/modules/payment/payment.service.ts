@@ -6,7 +6,6 @@ import {
 import {
   InitializePaymentDto,
   PaymentProviders,
-  VerifyPaymentDto,
 } from './dto/payment-initialize.dto';
 import { User } from '../user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,10 +14,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ActivityService } from '../activity/activity.service';
-import {
-  InitializePaymentDataResponse,
-  VerifyPaymentDataResponse,
-} from './responses/payment-response';
+import { InitializePaymentDataResponse } from './responses/payment-response';
 import { HelperService } from 'src/utilities/helper.service';
 import { PaymentRequest } from './entities/payment-request.entity';
 import { PaymentEntity, PaymentStatus } from '../cart/dto/checkout.dto';
@@ -39,6 +35,7 @@ import {
 } from '../transaction/dto/transaction.dto';
 import { TransactionService } from '../transaction/transaction.service';
 import { RedisCacheService } from 'src/utilities/redis-cache.service';
+import { AppConfigService } from '../app-config/app-config.service';
 
 @Injectable()
 export class PaymentService {
@@ -63,6 +60,7 @@ export class PaymentService {
     private _ng: NotificationGeneratorService,
     private transactionService: TransactionService,
     private _redis: RedisCacheService,
+    private appConfigService: AppConfigService,
   ) {
     setTimeout(() => {
       this.setMonnifyAccessToken();
@@ -98,7 +96,9 @@ export class PaymentService {
     request: InitializePaymentDto,
     user: User,
   ): Promise<InitializePaymentDataResponse> {
-    switch (request.paymentProvider) {
+    const config = await this.appConfigService.getConfig();
+    const paymentProvider = config.paymentProvider;
+    switch (paymentProvider) {
       case PaymentProviders.PAYSTACK:
         return await this.initializePaystackPayment(request, user);
       case PaymentProviders.MONNIFY:
@@ -191,20 +191,11 @@ export class PaymentService {
     }
   }
 
-  async verify(request: VerifyPaymentDto): Promise<VerifyPaymentDataResponse> {
-    switch (request.paymentProvider) {
-      case PaymentProviders.PAYSTACK:
-        return await this.verifyPaystackPayment(request);
-    }
-  }
-
-  async verifyPaystackPayment(
-    request: VerifyPaymentDto,
-  ): Promise<VerifyPaymentDataResponse> {
+  async verifyPaystackPayment(payment: PaymentRequest) {
     try {
       const response = await firstValueFrom(
         this.httpService.get(
-          `${this.configService.get<string>('paystack.url')}transaction/verify/${request.reference}`,
+          `${this.configService.get<string>('paystack.url')}transaction/verify/${payment.reference}`,
           {
             headers: {
               Authorization: `Bearer ${this.configService.get<string>('paystack.secret')}`,
@@ -213,20 +204,53 @@ export class PaymentService {
           },
         ),
       );
-      if (response.data.data.status === 'success') {
-        return {
-          status: 'success',
-          reference: response.data.data.reference,
-        };
+      const body = response?.data?.data;
+      console.log(body);
+      if (body.status === 'success') {
+        const amount = body.amount / 100;
+        const fee = body.fees / 100;
+        const reference = body.reference;
+        this.updatePaymentWebhook(payment, amount, reference, fee);
       }
-      return {
-        status: response.data.data.status ?? 'failed',
-        reference: response.data.data.reference,
-      };
     } catch (error) {
-      this.activityService.log(error, 'PAYSTACK VERIFY PAYMENT');
-      throw new BadRequestException(
-        error?.response?.data ?? 'Unable to verify payment',
+      this.activityService.log(
+        error?.response ?? error,
+        'PAYSTACK VERIFY PAYMENT',
+      );
+    }
+  }
+
+  async verifyMonnifyPayment(payment: PaymentRequest) {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(
+          `${this.configService.get<string>('monnify.url')}v1/transactions/search?paymentReference=${payment.code}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.monnifyAccessToken}`,
+              'Content-Type': 'application/json',
+            },
+          },
+        ),
+      );
+      // const body = response.data.responseBody;
+      const body = response.data.responseBody;
+      console.log(body);
+      if (body.content.length > 0) {
+        const transaction = body.content[0];
+        if (transaction.paymentStatus === 'PAID') {
+          this.updatePaymentWebhook(
+            payment,
+            transaction.amount,
+            transaction.transactionReference,
+            transaction.fee,
+          );
+        }
+      }
+    } catch (error) {
+      this.activityService.log(
+        error?.response ?? error,
+        'MONNIFY INITIALIZE PAYMENT',
       );
     }
   }
@@ -361,7 +385,7 @@ export class PaymentService {
         providerFee: fee,
         status: TransactionStatus.success,
         currency: 'NGN',
-        paymentProvider: PaymentProviders.PAYSTACK,
+        paymentProvider: payment.provider as PaymentProviders,
         purpose: TransactionPurpose.order,
         credit: false,
       });
@@ -374,7 +398,7 @@ export class PaymentService {
         providerFee: fee,
         status: TransactionStatus.success,
         currency: 'NGN',
-        paymentProvider: PaymentProviders.PAYSTACK,
+        paymentProvider: payment.provider as PaymentProviders,
         purpose: TransactionPurpose.deposit,
         credit: true,
       });
@@ -383,43 +407,16 @@ export class PaymentService {
 
   @Cron(CronExpression.EVERY_30_SECONDS)
   async checkMonnifyTransactionStatus() {
+    console.log('Checking payment status...');
     const payments = await this.paymentRequestRepository.findBy({
-      provider: PaymentProviders.MONNIFY,
       status: PaymentStatus.pending,
     });
     if (payments.length > 0) {
       for (const payment of payments) {
-        try {
-          const response = await firstValueFrom(
-            this.httpService.get(
-              `${this.configService.get<string>('monnify.url')}v1/transactions/search?paymentReference=${payment.code}`,
-              {
-                headers: {
-                  Authorization: `Bearer ${this.monnifyAccessToken}`,
-                  'Content-Type': 'application/json',
-                },
-              },
-            ),
-          );
-          // const body = response.data.responseBody;
-          const body = response.data.responseBody;
-          console.log(body);
-          if (body.content.length > 0) {
-            const transaction = body.content[0];
-            if (transaction.paymentStatus === 'PAID') {
-              this.updatePaymentWebhook(
-                payment,
-                transaction.amount,
-                transaction.transactionReference,
-                transaction.fee,
-              );
-            }
-          }
-        } catch (error) {
-          this.activityService.log(
-            error?.response ?? error,
-            'MONNIFY INITIALIZE PAYMENT',
-          );
+        if (payment.provider == PaymentProviders.MONNIFY) {
+          await this.verifyMonnifyPayment(payment);
+        } else if (payment.provider == PaymentProviders.PAYSTACK) {
+          await this.verifyPaystackPayment(payment);
         }
       }
     }
@@ -428,7 +425,6 @@ export class PaymentService {
   @Cron(CronExpression.EVERY_30_SECONDS)
   async cancelExpiredPayment() {
     const payments = await this.paymentRequestRepository.findBy({
-      provider: PaymentProviders.MONNIFY,
       status: PaymentStatus.pending,
     });
     if (payments.length > 0) {

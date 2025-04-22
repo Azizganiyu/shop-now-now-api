@@ -40,4 +40,13 @@ export class SpecialRequestService {
   async remove(id: string) {
     return await this.requestRepository.delete(id);
   }
+
+  async markAsRead(id: string) {
+    return await this.requestRepository.update(id, { read: true });
+  }
+
+  async getUnreadCount(): Promise<number> {
+    const count = await this.requestRepository.countBy({ read: false });
+    return count ?? 0;
+  }
 }

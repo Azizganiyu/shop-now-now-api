@@ -30,6 +30,10 @@ export class SpecialRequest {
   @ApiProperty()
   quantity: number;
 
+  @Column({ nullable: true, default: false })
+  @ApiProperty()
+  read?: boolean;
+
   @Column()
   @ApiProperty()
   userId: string;

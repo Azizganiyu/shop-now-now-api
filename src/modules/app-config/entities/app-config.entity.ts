@@ -51,10 +51,6 @@ export class AppConfig {
   @ApiProperty()
   discountValueType?: string;
 
-  @Column({ type: 'double', nullable: true, default: 10.5 })
-  @ApiProperty()
-  sellingPricePercentage?: number;
-
   @Column({ type: 'double', nullable: true, default: 8000 })
   @ApiProperty()
   defaultDeliveryPrice?: number;
@@ -85,4 +81,8 @@ export class AppConfig {
   @Column({ nullable: true })
   @ApiProperty()
   pickupPhone?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  paymentProvider?: string;
 }

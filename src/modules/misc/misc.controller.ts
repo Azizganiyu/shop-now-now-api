@@ -171,6 +171,22 @@ export class MiscController {
     };
   }
 
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('lgas/active')
+  async getActiveLgas() {
+    const lgasWithLocations = await this.lgaRepository
+      .createQueryBuilder('lga')
+      .innerJoin('lga.locations', 'location') // Only include LGAs that have locations
+      .leftJoinAndSelect('lga.locations', 'locations') // Optionally select the locations
+      .getMany();
+    return {
+      status: true,
+      message: 'success',
+      data: lgasWithLocations,
+    };
+  }
+
   /**
    * Decrypts encrypted text using the helper service.
    *

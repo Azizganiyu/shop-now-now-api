@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository } from 'typeorm';
 import { RequestContextService } from 'src/utilities/request-context.service';
@@ -143,10 +147,10 @@ export class ProductService {
     const id = product.sku ?? this.helperService.idFromName(product.name);
     await this.checkTaken(id);
     if (!product.sellingPrice) {
-      const appConfig = await this.appConfigService.getConfig();
-      const percentage =
-        category.band.sellingPricePercentage ??
-        appConfig.sellingPricePercentage;
+      if (!category.band.sellingPricePercentage) {
+        throw new UnprocessableEntityException('Selling price is required');
+      }
+      const percentage = category.band.sellingPricePercentage;
       product.sellingPrice =
         (percentage / 100) * product.costPrice + product.costPrice;
     }
@@ -183,10 +187,10 @@ export class ProductService {
       relations: ['band'],
     });
     if (!product.sellingPrice) {
-      const appConfig = await this.appConfigService.getConfig();
-      const percentage =
-        category.band.sellingPricePercentage ??
-        appConfig.sellingPricePercentage;
+      if (!category.band.sellingPricePercentage) {
+        throw new UnprocessableEntityException('Selling price is required');
+      }
+      const percentage = category.band.sellingPricePercentage;
       product.sellingPrice =
         (percentage / 100) * product.costPrice + product.costPrice;
     }

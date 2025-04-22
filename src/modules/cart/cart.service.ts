@@ -167,7 +167,6 @@ export class CartService {
           payment = await this.paymenService.initialize(
             {
               amount: amountToPay,
-              paymentProvider: PaymentProviders.MONNIFY,
               entity: PaymentEntity.SHIPMENT,
               entityReference: shipment.reference,
             },

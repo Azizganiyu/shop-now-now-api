@@ -178,13 +178,16 @@ export class ScheduleService {
 
     let currentTime = new Date(nigeriaDate);
     currentTime.setHours(startHour, startMinute, 0, 0); // Set provided start time
+    // console.log(currentTime);
 
     const endTimeObj = new Date(nigeriaDate);
     endTimeObj.setHours(endHour, endMinute, 0, 0); // Set provided end time
 
     // Get the actual current time in UTC+1 (Nigeria time)
     const now = new Date();
+    // console.log(now);
     now.setUTCHours(now.getUTCHours() + 1);
+    // console.log(now);
 
     // If the current time is past the start time, adjust to the next closest 30-minute mark
     if (currentTime < now) {
@@ -204,6 +207,7 @@ export class ScheduleService {
       }
 
       currentTime.setHours(adjustedHour, adjustedMinute, 0, 0);
+      // console.log(currentTime);
     }
 
     const formatTime = (date: Date) => {
@@ -228,8 +232,11 @@ export class ScheduleService {
         slotStart.getTime() + intervalMinutes * 60 * 1000,
       );
 
+      // console.log(slotStart, slotEnd);
+
       const startFormatted = formatTime(slotStart);
       const endFormatted = formatTime(slotEnd);
+      // console.log(startFormatted, endFormatted);
 
       slots.push({
         slotStart: startFormatted,

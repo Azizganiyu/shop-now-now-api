@@ -3,12 +3,20 @@ import { Order } from 'src/modules/order/entities/order.entity';
 
 @Injectable()
 export class OrderReceipt {
+  capitalize(text: any): string {
+    return text
+      .toLowerCase()
+      .split(' ')
+      .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   generateProcessing(info: string, order: Order) {
     let orderItems = '';
     order.items.forEach((item) => {
       orderItems += `<tr>
                     <td> 
-                        <img src="${item.product.image}">
+                        <img width="50" src="${item.product.image}">
                     </td>
                     <td style="text-align: left; padding: 10px 8px;">
                       <span style="font-size: 14px; color: #555;">${item.product.name}</span>
@@ -21,8 +29,7 @@ export class OrderReceipt {
 
     let fees = '';
     Object.entries(order.shipments[0].fees).forEach(([key, value]) => {
-      console.log(`Key: ${key}, Value: ${value}`);
-      fees += `<p style="font-size: 14px; font-weight: bold; color: #232f3e;">${key}: <span style="font-size: 14px;">₦${this.formatAccounting(value)}</span></p>`;
+      fees += `<p style="font-size: 14px; font-weight: bold; color: #232f3e;">${this.capitalize(key)}: <span style="font-size: 14px;">₦${this.formatAccounting(value)}</span></p>`;
     });
 
     return `<table style="width: 100%;">
@@ -36,7 +43,7 @@ export class OrderReceipt {
                 <h2 style="font-size: 18px; margin-bottom: 10px;">Order Summary</h2>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Order Number: <strong>#${order.reference}</strong></p>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Order Date: <strong>${this.getDate(order.createdAt)}</strong></p>
-                <p style="font-size: 14px; color: #555; margin: 5px 0;">Delivery Address: <strong>${order.shipments[0].address}, ${order.shipments[0].lga.name}</strong></p>
+                <p style="font-size: 14px; color: #555; margin: 5px 0;">Delivery Address: <strong>${order.shipments[0].address.description}, ${order.shipments[0].lga.name}</strong></p>
                 <p style="font-size: 14px; color: #555; margin: 5px 0;">Expected Delivery Date: <strong>${this.getDate(order.shipments[0].expectedDeliveryDate)}</strong></p>
               </div>
               <h3 style="font-size: 18px; margin-top: 30px;">Your Order Items</h3>

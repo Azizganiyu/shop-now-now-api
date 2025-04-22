@@ -17,10 +17,7 @@ import { PaymentService } from './payment.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorator/roles.decorator';
-import {
-  InitializePaymentDto,
-  VerifyPaymentDto,
-} from './dto/payment-initialize.dto';
+import { InitializePaymentDto } from './dto/payment-initialize.dto';
 import { Userx } from 'src/decorator/userx.decorator';
 import { User } from '../user/entities/user.entity';
 import {
@@ -29,10 +26,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import {
-  InitializePaymentResponse,
-  VerifyPaymentResponse,
-} from './responses/payment-response';
+import { InitializePaymentResponse } from './responses/payment-response';
 import { ActivityService } from '../activity/activity.service';
 import { PaymentStatus } from '../cart/dto/checkout.dto';
 import { FindPaymentDto } from './dto/find-payment.dto';
@@ -78,20 +72,6 @@ export class PaymentController {
     return {
       status: true,
       message: 'initialization successful',
-      data,
-    };
-  }
-
-  @ApiOkResponse({ type: VerifyPaymentResponse })
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles('user')
-  @HttpCode(200)
-  @Post('verify')
-  async verifyPayment(@Body() request: VerifyPaymentDto) {
-    const data = await this.paymentService.verify(request);
-    return {
-      status: true,
-      message: 'verification successful',
       data,
     };
   }
