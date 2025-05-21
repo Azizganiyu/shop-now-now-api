@@ -85,4 +85,12 @@ export class AppConfig {
   @Column({ nullable: true })
   @ApiProperty()
   paymentProvider?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  @ApiProperty()
+  deliveryExcludedWeek?: string;
+
+  @Column({ nullable: true, type: 'text' })
+  @ApiProperty()
+  deliveryExcludedDates?: string;
 }

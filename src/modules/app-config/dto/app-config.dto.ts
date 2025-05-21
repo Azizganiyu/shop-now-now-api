@@ -131,4 +131,14 @@ export class CreateConfigDto {
   @IsOptional()
   @IsString()
   paymentProvider?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  deliveryExcludedWeek?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  deliveryExcludedDates?: string;
 }
