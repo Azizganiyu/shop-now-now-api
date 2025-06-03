@@ -48,6 +48,7 @@ import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import * as dotenv from 'dotenv';
 import { SendMailDto } from './dto/send-mail.dto';
 import { NotificationGeneratorService } from '../notification/notification-generator/notification-generator.service';
+import { Product } from '../product/entities/product.entity';
 // import { FirebaseService } from '../notification/firebase/firebase.service';
 
 dotenv.config();
@@ -100,6 +101,7 @@ export class MiscController {
     private miscService: MiscService,
     private _ng: NotificationGeneratorService,
     // private firebaseService: FirebaseService,
+    @InjectRepository(Product) private productRepository: Repository<Product>,
   ) {}
 
   /**
@@ -330,6 +332,27 @@ export class MiscController {
   @Get('product/upload')
   async uploadProduct() {
     await this.miscService.uploadProducts();
+    return {
+      status: true,
+      message: 'success',
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('product/clean-image')
+  async cleanImage() {
+    const products = await this.productRepository.find();
+    let count = 0;
+    for (const product of products) {
+      let image = product.image;
+      image = image.replace(/\u00A0/g, ' ');
+      image = image.replace(/\s+/g, ' ').trim();
+      product.image = image;
+      await this.productRepository.save(product);
+      count++;
+      console.log(`${count} of ${products.length}`);
+    }
     return {
       status: true,
       message: 'success',

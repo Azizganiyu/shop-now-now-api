@@ -10,6 +10,7 @@ import { LGA } from '../location/entities/lga.entity';
 import { MiscService } from './misc.service';
 import { DeviceToken } from './entities/device-tokens.entity';
 import { ProductModule } from '../product/product.module';
+import { Product } from '../product/entities/product.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { ProductModule } from '../product/product.module';
     SharedModule,
     MailModule,
     ProductModule,
-    TypeOrmModule.forFeature([User, Wallet, LGA, DeviceToken]),
+    TypeOrmModule.forFeature([User, Wallet, LGA, DeviceToken, Product]),
   ],
   controllers: [MiscController],
   providers: [MiscService],

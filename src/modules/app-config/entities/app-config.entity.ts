@@ -93,4 +93,12 @@ export class AppConfig {
   @Column({ nullable: true, type: 'text' })
   @ApiProperty()
   deliveryExcludedDates?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  androidVersion?: string;
+
+  @Column({ nullable: true })
+  @ApiProperty()
+  iosVersion?: string;
 }
