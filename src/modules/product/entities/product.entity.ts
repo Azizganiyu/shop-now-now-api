@@ -18,7 +18,7 @@ import { WishItem } from 'src/modules/cart/entities/wish-item.entity';
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
 
   @Column({ unique: true })
   @ApiProperty()
@@ -60,6 +60,10 @@ export class Product {
   @Column({ type: 'longtext', nullable: true })
   @ApiProperty()
   image?: string;
+
+  @Column({ unique: true, nullable: true })
+  @ApiProperty()
+  sku?: string;
 
   @OneToMany(() => Cart, (cart) => cart.product)
   @Exclude()

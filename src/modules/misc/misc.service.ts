@@ -6,6 +6,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { productData } from './product.data';
+import { productImage } from './product.image';
+import { HelperService } from 'src/utilities/helper.service';
+import { ProductService } from '../product/product-services/product.service';
+import { ProductCategoryService } from '../product/product-services/category.service';
 
 @Injectable()
 export class MiscService {
@@ -14,6 +19,9 @@ export class MiscService {
   constructor(
     private readonly httpService: HttpService,
     private configService: ConfigService,
+    private helperService: HelperService,
+    private productService: ProductService,
+    private productCategoryService: ProductCategoryService,
   ) {
     this.googleApiKey = this.configService.get<string>('google.apiKey');
     console.log(this.googleApiKey);
@@ -86,5 +94,74 @@ export class MiscService {
     } catch (error) {
       throw new InternalServerErrorException(error?.message ?? error);
     }
+  }
+
+  async uploadProducts() {
+    const products = productData;
+    const images = productImage;
+    const categories = await this.productCategoryService.findAll(true);
+
+    console.log('processing products...');
+    const updatedProducts = products.map((product) => {
+      let imageUrl = '';
+
+      const matches = [];
+
+      for (const image of images) {
+        matches.push({
+          match: this.helperService.checkMatch(product.item, image.image),
+          image: image.image,
+          product: product.item,
+        });
+      }
+
+      const sortedMatches = matches.sort((a, b) => b.match - a.match);
+      imageUrl = sortedMatches[0].image;
+      const categoryMatches = [];
+
+      for (const category of categories) {
+        categoryMatches.push({
+          match: this.helperService.checkMatch(product.category, category.name),
+          category: category.name,
+          categoryId: category.id,
+        });
+      }
+
+      const sortedCategoryMatches = categoryMatches.sort(
+        (a, b) => b.match - a.match,
+      );
+      const categoryId = sortedCategoryMatches[0].categoryId;
+
+      return {
+        ...product,
+        categoryId,
+        imageUrl,
+      };
+    });
+
+    console.log('uploading products...');
+    console.log(updatedProducts.length);
+    let created = 0;
+    const errors = [];
+    for (const product of updatedProducts) {
+      const payload = {
+        name: product.item,
+        image: `https://api.shopnownow.app/uploads/files/${product.imageUrl}`,
+        categoryId: product.categoryId,
+        sku: this.helperService.idFromName(product.item),
+        stock: 100000000,
+        costPrice: parseFloat(product.price.replace(/,/g, '')),
+        sellingPrice: parseFloat(product.price.replace(/,/g, '')),
+      };
+      try {
+        await this.productService.create(payload);
+      } catch (error) {
+        console.log(error);
+        errors.push(payload);
+      }
+      created++;
+      console.log(`created ${created} of ${updatedProducts.length}`);
+    }
+    console.log('Errors', errors.length, errors);
   }
 }

@@ -32,5 +32,6 @@ import { Schedule } from '../schedule/entities/schedule.entity';
     ProductBandController,
   ],
   providers: [ProductService, ProductCategoryService, ProductBandService],
+  exports: [ProductService, ProductCategoryService, ProductBandService],
 })
 export class ProductModule {}

@@ -9,7 +9,6 @@ import {
   IsPositive,
   ValidateNested,
 } from 'class-validator';
-import { Column } from 'typeorm';
 
 export class CreateProductCategory {
   @ApiProperty()
@@ -46,19 +45,13 @@ export class CreateProduct {
   @IsOptional()
   description?: string;
 
-  @ApiProperty()
-  @Column({
-    default: 10,
-    nullable: true,
-  })
-  minOrder: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  minOrder?: number;
 
-  @ApiProperty()
-  @Column({
-    default: 10,
-    nullable: true,
-  })
-  maxOrder: number;
+  @ApiPropertyOptional()
+  @IsOptional()
+  maxOrder?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -42,6 +42,12 @@ export class ProductService {
       .leftJoinAndSelect('product.category', 'category')
       .leftJoinAndSelect('category.band', 'band')
       .andWhere(
+        filter.admin == 'false' ? `category.status = :categoryStatus` : '1=1',
+        {
+          categoryStatus: true,
+        },
+      )
+      .andWhere(
         !filter.admin || filter.admin != 'true'
           ? `product.status = :status`
           : '1=1',
@@ -144,8 +150,10 @@ export class ProductService {
       where: { id: product.categoryId },
       relations: ['band'],
     });
-    const id = product.sku ?? this.helperService.idFromName(product.name);
-    await this.checkTaken(id);
+    if (!product.sku) {
+      product.sku = this.helperService.idFromName(product.name);
+    }
+    product.sku = await this.checkSkuTaken(product.sku);
     if (!product.sellingPrice) {
       if (!category.band.sellingPricePercentage) {
         throw new UnprocessableEntityException('Selling price is required');
@@ -155,7 +163,6 @@ export class ProductService {
         (percentage / 100) * product.costPrice + product.costPrice;
     }
     const create = await this.productRepository.create({
-      id,
       ...product,
     });
     return await this.productRepository.save(create);
@@ -167,11 +174,12 @@ export class ProductService {
    * @param id - ID or SKU derived from the product name.
    * @throws BadRequestException if the name or SKU is already taken.
    */
-  async checkTaken(id: string) {
-    const exist = await this.findOne(id);
+  async checkSkuTaken(sku: string) {
+    const exist = await this.productRepository.findOne({ where: { sku } });
     if (exist) {
-      throw new BadRequestException('Name or SKU is already taken');
+      return `${sku}-${this.helperService.generateRandomString()}`;
     }
+    return sku;
   }
 
   /**

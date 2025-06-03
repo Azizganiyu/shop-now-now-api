@@ -324,4 +324,15 @@ export class MiscController {
   //     message: 'success',
   //   };
   // }
+
+  @ApiOkResponse()
+  @HttpCode(200)
+  @Get('product/upload')
+  async uploadProduct() {
+    await this.miscService.uploadProducts();
+    return {
+      status: true,
+      message: 'success',
+    };
+  }
 }
