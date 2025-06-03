@@ -343,6 +343,7 @@ export class MiscController {
   @Get('product/clean-image')
   async cleanImage() {
     const products = await this.productRepository.find();
+    console.log(products.length);
     let count = 0;
     for (const product of products) {
       let image = product.image;
