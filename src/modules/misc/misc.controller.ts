@@ -340,6 +340,38 @@ export class MiscController {
 
   @ApiOkResponse()
   @HttpCode(200)
+  @Get('product/clean-image')
+  async cleanImage() {
+    const products = await this.productRepository.find();
+    console.log(products.length);
+    let count = 0;
+    for (const product of products) {
+      let image = product.image;
+
+      // Replace non-breaking spaces with regular spaces
+      image = image.replace(/\u00A0/g, ' ');
+
+      // Replace multiple spaces with a single space
+      image = image.replace(/\s+/g, ' ').trim();
+
+      // Replace remaining spaces with underscores
+      image = image.replace(/ /g, '_');
+
+      product.image = image;
+
+      await this.productRepository.save(product);
+      count++;
+      console.log(`${count} of ${products.length}`);
+    }
+
+    return {
+      status: true,
+      message: 'success',
+    };
+  }
+
+  @ApiOkResponse()
+  @HttpCode(200)
   @Get('product/capitalize')
   async capitalize() {
     const products = await this.productRepository.find();

@@ -17,7 +17,7 @@ export class RessetPasswordDto {
   @IsDefined()
   @IsNotEmpty()
   @ApiProperty()
-  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
+  @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[@#$!%*?&])[A-Za-z\d@#$!%*?&]{8,}$/, {
     message:
       'Password must contain at least one uppercase letter, one number, one special character, and be at least 8 characters long',
   })
