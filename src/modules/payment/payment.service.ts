@@ -429,7 +429,10 @@ export class PaymentService {
     });
     if (payments.length > 0) {
       for (const payment of payments) {
-        const dueDate = this.helperService.addToDate(payment.createdAt, 1800);
+        const dueDate = this.helperService.addToDate(
+          payment.createdAt,
+          60 * 60 * 12,
+        );
         if (this.helperService.checkExpired(dueDate)) {
           this.paymentRequestRepository.update(payment.id, {
             status: PaymentStatus.canceled,
