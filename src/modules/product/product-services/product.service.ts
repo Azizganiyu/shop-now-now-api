@@ -102,10 +102,12 @@ export class ProductService {
       .andWhere(
         filter.search
           ? new Brackets((qb) => {
-              qb.where('product.name like :name', {
-                name: '%' + filter.search + '%',
-              }).orWhere('product.description like :description', {
-                description: '%' + filter.search + '%',
+              const keywords = filter.search.trim().split(/\s+/);
+              keywords.forEach((keyword, index) => {
+                qb.andWhere(
+                  `(product.name LIKE :kw${index} OR product.description LIKE :kw${index})`,
+                  { [`kw${index}`]: `%${keyword}%` },
+                );
               });
             })
           : '1=1',
@@ -116,7 +118,35 @@ export class ProductService {
       .andWhere(filter.to ? `product.createdAt <= :toDate` : '1=1', {
         toDate: filter.to,
       })
-      .orderBy('product.createdAt', pageOptionsDto.order)
+      .orderBy(
+        filter.search
+          ? `
+            CASE
+              WHEN product.name LIKE :exact THEN 1
+              WHEN product.description LIKE :exact THEN 2
+              ELSE 3
+            END
+          `
+          : 'product.createdAt',
+        filter.search ? 'ASC' : pageOptionsDto.order,
+      )
+      .setParameters(
+        filter.search
+          ? {
+              exact: `%${filter.search.trim()}%`,
+              ...filter.search
+                .trim()
+                .split(/\s+/)
+                .reduce(
+                  (acc, kw, i) => {
+                    acc[`kw${i}`] = `%${kw}%`;
+                    return acc;
+                  },
+                  {} as Record<string, string>,
+                ),
+            }
+          : {},
+      )
       .skip(pageOptionsDto.skip)
       .take(pageOptionsDto.take);
 
