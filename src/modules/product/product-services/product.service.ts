@@ -120,13 +120,7 @@ export class ProductService {
       })
       .orderBy(
         filter.search
-          ? `
-            CASE
-              WHEN product.name LIKE :exact THEN 1
-              WHEN product.description LIKE :exact THEN 2
-              ELSE 3
-            END
-          `
+          ? `CASE WHEN product.name LIKE :exact THEN 1 WHEN product.description LIKE :exact THEN 2 ELSE 3 END`
           : 'product.createdAt',
         filter.search ? 'ASC' : pageOptionsDto.order,
       )
