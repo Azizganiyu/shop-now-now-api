@@ -104,8 +104,8 @@ export class ProductService {
           ? new Brackets((qb) => {
               const keywords = filter.search.trim().split(/\s+/);
               keywords.forEach((keyword, index) => {
-                qb.andWhere(
-                  `(product.name LIKE :kw${index} OR product.description LIKE :kw${index})`,
+                qb.orWhere(
+                  `product.name LIKE :kw${index} OR product.description LIKE :kw${index}`,
                   { [`kw${index}`]: `%${keyword}%` },
                 );
               });
@@ -117,32 +117,53 @@ export class ProductService {
       })
       .andWhere(filter.to ? `product.createdAt <= :toDate` : '1=1', {
         toDate: filter.to,
-      })
-      .orderBy(
-        filter.search
-          ? `CASE WHEN product.name LIKE :exact THEN 1 WHEN product.description LIKE :exact THEN 2 ELSE 3 END`
-          : 'product.createdAt',
-        filter.search ? 'ASC' : pageOptionsDto.order,
-      )
-      .setParameters(
-        filter.search
-          ? {
-              exact: `%${filter.search.trim()}%`,
-              ...filter.search
-                .trim()
-                .split(/\s+/)
-                .reduce(
-                  (acc, kw, i) => {
-                    acc[`kw${i}`] = `%${kw}%`;
-                    return acc;
-                  },
-                  {} as Record<string, string>,
-                ),
-            }
-          : {},
-      )
-      .skip(pageOptionsDto.skip)
-      .take(pageOptionsDto.take);
+      });
+
+    if (filter.search) {
+      const keywords = filter.search.trim().split(/\s+/);
+
+      const keywordParams = keywords.reduce(
+        (acc, kw, i) => {
+          acc[`kw${i}`] = `%${kw}%`;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+
+      products.addSelect(
+        `
+          (
+            CASE 
+              WHEN product.name LIKE :exact THEN 100
+              WHEN product.description LIKE :exact THEN 90
+              ELSE 0
+            END
+            +
+            ${keywords
+              .map(
+                (_, i) => `
+                  (CASE WHEN product.name LIKE :kw${i} THEN 10 ELSE 0 END)
+                  +
+                  (CASE WHEN product.description LIKE :kw${i} THEN 5 ELSE 0 END)
+                `,
+              )
+              .join(' + ')}
+          )
+        `,
+        'match_score',
+      );
+
+      products.setParameters({
+        exact: `%${filter.search.trim()}%`,
+        ...keywordParams,
+      });
+
+      products.orderBy('match_score', 'DESC');
+    } else {
+      products.orderBy('product.createdAt', pageOptionsDto.order);
+    }
+
+    products.skip(pageOptionsDto.skip).take(pageOptionsDto.take);
 
     const itemCount = await products.getCount();
     const { entities } = await products.getRawAndEntities();
